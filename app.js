@@ -17,7 +17,7 @@ let cache = apicache.middleware
 
 // ** Passthrough RPDE fetch **
 // TODO: Restrict with cors and to RPDE only
-app.get('/fetch', cache('5 minutes'), async(req, res, next) => {
+app.get('/fetch', cache('48 hours'), async(req, res, next) => {
   const page = await axios.get(req.query.url);
   res.status(200).send(page.data);
 });
