@@ -1,0 +1,21 @@
+{
+  "name": "rpde-visualiser",
+  "version": "1.0.0",
+  "description": "Visualiser of RPDE feeds",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nick Evans",
+  "license": "MIT",
+  "dependencies": {
+    "apicache": "^1.6.2",
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.1"
+  },
+  "engines": {
+    "node": "14.15.0"
+  }
+}
