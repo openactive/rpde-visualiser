@@ -355,7 +355,7 @@ function loadRPDEPage(url, storeId, filters) {
                         "                <div class='col' style=\"text-align: right\">" +
                         //"                    <button id='" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 visualiseButton'>Visualise</button>" +
                         "                    <button id='json" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 '> JSON</button>" +
-                        //"                    <button id='validate" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Validate</button>" +
+                        "                    <button id='validate" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Validate</button>" +
                         //"                    <button id='richness" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Richness</button>" +
                         "                </div>" +
                         "            </div>" +
@@ -368,7 +368,8 @@ function loadRPDEPage(url, storeId, filters) {
                         getJSON(value.id);
                     });
                     $("#validate" + matchingItemCount).on("click", function () {
-                        getValidate(value.id);
+                        openValidator(value.id);
+                        //getValidate(value.id);
                     });
                     $("#richness" + matchingItemCount).on("click", function () {
                         getRichness(value.id);
@@ -446,6 +447,14 @@ function getRawJSON(id) {
     let win = window.open(url, "_blank");
     win.focus();
 }
+
+function openValidator(id) {
+  const jsonString = JSON.stringify(loadedData[id], null, 2);
+  const url = `https://validator.openactive.io/#/json/${Base64.encodeURI(jsonString)}`;
+  const win = window.open(url, "_blank");
+  win.focus();
+}
+
 
 function getValidate(id) {
     $("#resultTab").removeClass("active");
