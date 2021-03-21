@@ -409,7 +409,7 @@ function loadRPDEPage(url, storeId, filters) {
           
           const elapsed = luxon.DateTime.now().diff(harvestStart, ['seconds']).toObject().seconds;
           if (url !== data.next) {
-            $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount} in ${elapsed} seconds`);
+            $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount} in ${elapsed} seconds; Loading...`);
             loadRPDEPage(data.next, storeId, filters);
           } else {
             $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount}; Loading complete in ${elapsed} seconds`);
@@ -419,15 +419,13 @@ function loadRPDEPage(url, storeId, filters) {
           }
       })
       .fail(function () {
-          $("#results").empty().append("An error has occurred");
-          if (config.schemaType === "OpenReferral") {
-              $("#results").append(" or no results were found");
-          }
-          $("#results").append('<div><button class="show-error btn btn-secondary">Show error</button></div>');
-          $(".show-error").on("click", function () {
-              let win = window.open(url, "_blank");
-              win.focus();
-          });
+        const elapsed = luxon.DateTime.now().diff(harvestStart, ['seconds']).toObject().seconds;
+        $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount} in ${elapsed} seconds; An error occurred, please retry.`);
+        $("#results").empty().append("An error has occurred");
+        $("#results").append('<div><button class="show-error btn btn-secondary">Retry</button></div>');
+        $(".show-error").on("click", function () {
+            executeForm();
+        });
       });
 }
 
