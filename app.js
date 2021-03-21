@@ -15,11 +15,31 @@ app.use(cors());
 
 let cache = apicache.middleware
 
+const onlyStatus200 = (req, res) => res.statusCode === 200
+
+const cacheSuccesses = cache('48 hours', onlyStatus200)
+
 // ** Passthrough RPDE fetch **
 // TODO: Restrict with cors and to RPDE only
-app.get('/fetch', cache('48 hours'), async(req, res, next) => {
-  const page = await axios.get(req.query.url);
+app.get('/fetch', cacheSuccesses, async(req, res, next) => {
+  try {
+      const page = await axios.get(req.query.url);
   res.status(200).send(page.data);
+  } catch (error) {
+    if (error.response) {
+      // Request made and server responded
+      res.status(error.response.status).send(error.response.data);
+    } else if (error.request) {
+      // The request was made but no response was received
+      res.status(500).send(error.request);
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error=
+      res.status(500).send({ error: error.message });
+      console.log('Error', error.message);
+    }
+  }
+
 });
 
 // ** Store RPDE length ** 
