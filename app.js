@@ -3,6 +3,36 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const apicache = require('apicache');
+const { Handler } = require('htmlmetaparser');
+const { Parser } = require('htmlparser2');
+
+function extractJSONLDfromHTML(url, html) {
+  let jsonld = null;
+
+  const handler = new Handler(
+    (err, result) => {
+      if (!err && typeof result === 'object') {
+        const jsonldArray = result.jsonld;
+        // Use the first JSON-LD block on the page
+        if (Array.isArray(jsonldArray) && jsonldArray.length > 0) {
+          [jsonld] = jsonldArray;
+        }
+      }
+    },
+    {
+      url, // The HTML pages URL is used to resolve relative URLs. TODO: Remove this
+    },
+  );
+
+  // Create a HTML parser with the handler.
+  const parser = new Parser(handler, {
+    decodeEntities: true,
+  });
+  parser.write(html);
+  parser.done();
+
+  return jsonld;
+}
 
 const COLLECTION = 'https://openactive.io/data-catalogs/data-catalog-collection.jsonld';
 
@@ -11,6 +41,7 @@ var rpdeLengthMap = {};
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public'))
 app.use(cors());
 
 let cache = apicache.middleware
@@ -61,7 +92,24 @@ app.get('/rpde-feed-length', function (req, res) {
     // Get all datasets on load
     const collection = await axios.get(COLLECTION);
     if (collection.data.hasPart) {
-      datasets = (await Promise.all(collection.data.hasPart.map(url => axios.get(url)))).flatMap(x => x.data.dataset);
+      const datasetUrls = (await Promise.all(collection.data.hasPart.map(url => axios.get(url)))).flatMap(x => x.data.dataset);
+      const datasetSites = (await Promise.all(datasetUrls.map(async (url) => {
+        try {
+          return extractJSONLDfromHTML(url, (await axios.get(url, {
+            timeout: 5000
+          })).data)
+        }
+        catch (error)
+        {
+          console.log("Error getting dataset site: " + url);
+          return null;
+        }
+      }))).filter(x => x);
+      datasets =  datasetSites.map(site => ({
+        name: site.name + ' (SessionSeries)',
+        url: site.distribution.filter(x => x.additionalType === 'https://openactive.io/SessionSeries' && x.contentUrl.indexOf('legendonlineservices') < 0).map(x => x.contentUrl)[0]
+      })).filter(x => x.url && x.name.substr(0,1).trim()).sort((a,b) => ('' + a.name).localeCompare(b.name));
+      console.log("Got all dataset sites!");
     } else {
       throw new Error('Could not connect to https://openactive.io/data-catalogs/data-catalog-collection.jsonld')
     }
@@ -72,7 +120,7 @@ app.get('/rpde-feed-length', function (req, res) {
 })();
 
 app.get('/datasets', function (req, res) {
-  res.send(datasets);
+  res.send({"endpoints": datasets});
 });
 
 
