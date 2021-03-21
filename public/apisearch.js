@@ -341,21 +341,22 @@ function loadRPDEPage(url, storeId, filters) {
                 var itemMatchesDay = !filters.day ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.byDay && x.byDay.includes(filters.day) || x.byDay.includes(filters.day.replace('https', 'http'))).length > 0;
                 if (itemMatchesActivity && itemMatchesDay) {
                   matchingItemCount++;
-                  storeJson(value.id, value);
+                  
+                  storeJson(value.id, value.data);
 
                   if (matchingItemCount < 100) {
                     results.append(
-                        "<div id='col" + value.id + "' class='row rowhover'>" +
-                        "    <div id='text" + value.id + "' class='col-md-1 col-sm-2 text-truncate'> " + value.id + "</div>" +
+                        "<div id='col" + matchingItemCount + "' class='row rowhover'>" +
+                        "    <div id='text" + matchingItemCount + "' class='col-md-1 col-sm-2 text-truncate'> " + value.id + "</div>" +
                         "    <div class='col'>" + resolveProperty(value, 'name')  + "</div>" +
                         "    <div class='col'>" +
                         "        <div class='visualise'>" +
                         "            <div class='row'>" +
                         "                <div class='col' style=\"text-align: right\">" +
-                        //"                    <button id='" + value.id + "' class='btn btn-secondary btn-sm mb-1 visualiseButton'>Visualise</button>" +
-                        "                    <button id='json" + value.id + "' class='btn btn-secondary btn-sm mb-1 '> JSON</button>" +
-                        //"                    <button id='validate" + value.id + "' class='btn btn-secondary btn-sm mb-1'>Validate</button>" +
-                        //"                    <button id='richness" + value.id + "' class='btn btn-secondary btn-sm mb-1'>Richness</button>" +
+                        //"                    <button id='" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 visualiseButton'>Visualise</button>" +
+                        "                    <button id='json" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 '> JSON</button>" +
+                        //"                    <button id='validate" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Validate</button>" +
+                        //"                    <button id='richness" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Richness</button>" +
                         "                </div>" +
                         "            </div>" +
                         "        </div>" +
@@ -363,27 +364,31 @@ function loadRPDEPage(url, storeId, filters) {
                         "</div>"
                     );
 
-                    $("#json" + value.id).on("click", function () {
+                    $("#json" + matchingItemCount).on("click", function () {
                         getJSON(value.id);
                     });
-                    $("#validate" + value.id).on("click", function () {
+                    $("#validate" + matchingItemCount).on("click", function () {
                         getValidate(value.id);
                     });
-                    $("#richness" + value.id).on("click", function () {
+                    $("#richness" + matchingItemCount).on("click", function () {
                         getRichness(value.id);
                     });
 
                     if (value.id.length > 8) {
-                        $("#col" + value.id).hover(function () {
-                            $("#text" + value.id).removeClass("text-truncate");
-                            $("#text" + value.id).prop("style", "font-size: 70%");
+                        $("#col" + matchingItemCount).hover(function () {
+                            $("#text" + matchingItemCount).removeClass("text-truncate");
+                            $("#text" + matchingItemCount).prop("style", "font-size: 70%");
                         }, function () {
-                            $("#text" + value.id).addClass("text-truncate");
-                            $("#text" + value.id).prop("style", "font-size: 100%");
+                            $("#text" + matchingItemCount).addClass("text-truncate");
+                            $("#text" + matchingItemCount).prop("style", "font-size: 100%");
                         });
                     }
                   } else if (matchingItemCount === 100) {
-                    addApiPanel('Only the first 100 items are shown, the rest are hidden (TODO: Add paging)', false);
+                    results.append(
+                      "<div class='row rowhover'>" +
+                      "    <div>Only the first 100 items are shown, the rest are hidden (TODO: Add paging)</div>" +
+                      "</div>"
+                  );
                   }
                   
                 }
