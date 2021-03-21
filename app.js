@@ -1,7 +1,6 @@
 const axios = require('axios');
 const express = require('express');
 const http = require('http');
-const cors = require('cors');
 const apicache = require('apicache');
 const { Handler } = require('htmlmetaparser');
 const { Parser } = require('htmlparser2');
@@ -42,7 +41,6 @@ var rpdeLengthMap = {};
 const app = express();
 app.use(express.json());
 app.use(express.static('public'))
-app.use(cors());
 
 let cache = apicache.middleware
 
