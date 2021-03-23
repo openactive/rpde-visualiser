@@ -200,16 +200,21 @@ function clearStore() {
 }
 
 loadingTimeout = null;
+loadingDone = false;
 
 function loadingStart() {
   loadingTimeout = setTimeout(loadingTakingTime, 5000);
+  loadingDone = false;
 }
 
 function loadingTakingTime() {
-  $("#loading-time").show();
+  if (!loadingDone) {
+    $("#loading-time").show();
+  }
 }
 
 function loadingComplete() {
+  loadingDone = true;
   if (loadingTimeout) {
     clearTimeout(loadingTimeout);
     loadingTimeout = null;
