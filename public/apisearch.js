@@ -203,6 +203,9 @@ loadingTimeout = null;
 loadingDone = false;
 
 function loadingStart() {
+  if (loadingTimeout) {
+    clearTimeout(loadingTimeout);
+  }
   loadingTimeout = setTimeout(loadingTakingTime, 5000);
   loadingDone = false;
 }
