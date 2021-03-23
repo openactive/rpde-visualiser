@@ -26,3 +26,9 @@
 .w-95 {
   width: 95% !important;
 }
+
+#loading-time {
+  background-color: yellow;
+  margin: 5px;
+  padding: 10px;
+}

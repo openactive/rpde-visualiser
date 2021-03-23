@@ -199,6 +199,24 @@ function clearStore() {
   pagesLoaded = 0;
 }
 
+loadingTimeout = null;
+
+function loadingStart() {
+  loadingTimeout = setTimeout(loadingTakingTime, 5000);
+}
+
+function loadingTakingTime() {
+  $("#loading-time").show();
+}
+
+function loadingComplete() {
+  if (loadingTimeout) {
+    clearTimeout(loadingTimeout);
+    loadingTimeout = null;
+  }
+  $("#loading-time").hide();
+}
+
 function storeJson(id, json) {
   loadedData[id] = json;
 }
@@ -294,6 +312,8 @@ function executeForm(pageNumber) {
 
     $("#progress").text(`Loading first page...`);
     clearApiPanel();
+
+    loadingStart();
 
     var url = $("#endpoint").val();
     loadRPDEPage(url, currentStoreId, filters);
@@ -413,6 +433,7 @@ function loadRPDEPage(url, storeId, filters) {
             $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount} in ${elapsed} seconds; Loading...`);
             loadRPDEPage(data.next, storeId, filters);
           } else {
+            loadingComplete();
             $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount}; Loading complete in ${elapsed} seconds`);
             if (data.items.length === 0 && matchingItemCount === 0) {
               results.append("<div><p>No results found</p></div>");

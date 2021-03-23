@@ -84,7 +84,7 @@ app.get('/rpde-feed-length', function (req, res) {
 });
 
 // ** Cache dataset URLs ** 
-// TODO: refresh nightly
+// Note Heroku is restarted automatically nightly, so this collection is automatically updated each night
 (async () => {
   try {
     // Get all datasets on load
@@ -108,6 +108,11 @@ app.get('/rpde-feed-length', function (req, res) {
         url: site.distribution.filter(x => x.additionalType === 'https://openactive.io/SessionSeries' && x.contentUrl.indexOf('legendonlineservices') < 0).map(x => x.contentUrl)[0]
       })).filter(x => x.url && x.name.substr(0,1).trim()).sort((a,b) => ('' + a.name).localeCompare(b.name));
       console.log("Got all dataset sites!");
+
+      // Prefetch pages into cache to reduce initial load
+      datasets.forEach(dataset => {
+        harvest(dataset.url);
+      });
     } else {
       throw new Error('Could not connect to https://openactive.io/data-catalogs/data-catalog-collection.jsonld')
     }
@@ -121,6 +126,13 @@ app.get('/datasets', function (req, res) {
   res.send({"endpoints": datasets});
 });
 
+async function harvest(url) {
+  console.log(`Prefetch: ${url}`)
+  const { data } = await axios.get('https://visualiser.openactive.io/fetch?url=' + encodeURIComponent(url));
+  if (data.next !== url) {
+    harvest(data.next);
+  }
+}
 
 // ** Error handling ** 
 
