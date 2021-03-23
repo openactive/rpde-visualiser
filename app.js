@@ -36,7 +36,6 @@ function extractJSONLDfromHTML(url, html) {
 const COLLECTION = 'https://openactive.io/data-catalogs/data-catalog-collection.jsonld';
 
 let datasets = {};
-var rpdeLengthMap = {};
 
 const app = express();
 app.use(express.json());
@@ -69,18 +68,6 @@ app.get('/fetch', cacheSuccesses, async(req, res, next) => {
     }
   }
 
-});
-
-// ** Store RPDE length ** 
-app.post('/rpde-feed-length', function(req, res) {
-  if (req.body.feed && req.body.length) {
-    rpdeLengthMap[req.body.feed] = req.body.length;
-  }
-  res.status(201).send();
-});
-
-app.get('/rpde-feed-length', function (req, res) {
-    res.send(rpdeLengthMap);
 });
 
 // ** Cache dataset URLs ** 
