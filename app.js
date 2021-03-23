@@ -4,6 +4,9 @@ const http = require('http');
 const apicache = require('apicache');
 const { Handler } = require('htmlmetaparser');
 const { Parser } = require('htmlparser2');
+const sleep = require('util').promisify(setTimeout);
+
+const port = normalizePort(process.env.PORT || '3000');
 
 function extractJSONLDfromHTML(url, html) {
   let jsonld = null;
@@ -76,8 +79,19 @@ app.get('/fetch', cacheSuccesses, async(req, res, next) => {
   try {
     // Get all datasets on load
     const collection = await axios.get(COLLECTION);
-    if (collection.data.hasPart) {
-      const datasetUrls = (await Promise.all(collection.data.hasPart.map(url => axios.get(url)))).flatMap(x => x.data.dataset);
+    if (collection.data && collection.data.hasPart) {
+      const datasetUrls = (await Promise.all(collection.data.hasPart.map(async (url) => {
+        try {
+          return await axios.get(url, {
+            timeout: 5000
+          });
+        }
+        catch (error)
+        {
+          console.log("Error getting dataset site catalogue: " + url);
+          return null;
+        }
+      }))).filter(x => x).flatMap(x => x.data.dataset);
       const datasetSites = (await Promise.all(datasetUrls.map(async (url) => {
         try {
           return extractJSONLDfromHTML(url, (await axios.get(url, {
@@ -94,12 +108,14 @@ app.get('/fetch', cacheSuccesses, async(req, res, next) => {
         name: site.name + ' (SessionSeries)',
         url: site.distribution.filter(x => x.additionalType === 'https://openactive.io/SessionSeries' && x.contentUrl.indexOf('legendonlineservices') < 0).map(x => x.contentUrl)[0]
       })).filter(x => x.url && x.name.substr(0,1).trim()).sort((a,b) => ('' + a.name).localeCompare(b.name));
-      console.log("Got all dataset sites!");
+      console.log("Got all dataset sites: " + JSON.stringify(datasets, null, 2));
 
       // Prefetch pages into cache to reduce initial load
-      datasets.forEach(dataset => {
+      for (const dataset of datasets) {
+        // Distribute the prefetching calls to ensure a single services is not overloaded if serving more than one dataset site
+        await sleep(60000);
         harvest(dataset.url);
-      });
+      }
     } else {
       throw new Error('Could not connect to https://openactive.io/data-catalogs/data-catalog-collection.jsonld')
     }
@@ -115,8 +131,10 @@ app.get('/datasets', function (req, res) {
 
 async function harvest(url) {
   console.log(`Prefetch: ${url}`)
-  const { data } = await axios.get('https://visualiser.openactive.io/fetch?url=' + encodeURIComponent(url));
-  if (data.next !== url) {
+  const { data } = await axios.get(`http://localhost:${port}/fetch?url=` + encodeURIComponent(url));
+  if (!data.next) {
+    console.log(`Error prefetching: ${url}`);
+  } else if (data.next !== url) {
     harvest(data.next);
   }
 }
@@ -131,7 +149,6 @@ app.use(function (err, req, res, next) {
 const server = http.createServer(app);
 server.on('error', onError);
 
-const port = normalizePort(process.env.PORT || '3000');
 app.listen(port, () => {
   console.log(`Server running on port ${port}
 `);
