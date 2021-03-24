@@ -15,6 +15,7 @@ let maxAge;
 let viz1;
 let taxonomys;
 let config;
+let store;
 
 // This demo is based on https://neofusion.github.io/hierarchy-select/
 
@@ -60,18 +61,46 @@ function renderTree(concepts, level, output) {
 
 // ** Example of displaying this hierarchy **
 
+var scheme = null;
 $(function() {
   // Load the activity list
   // (note this file should be copied to your server on a nightly cron and served from there)
   $.getJSON('https://openactive.io/activity-list/activity-list.jsonld', function(data) {
     // Use SKOS.js to read the file (https://www.openactive.io/skos.js/)
-    var scheme = new skos.ConceptScheme(data);
+    scheme = new skos.ConceptScheme(data);
     
+    renderActivityList(scheme);
+    
+    // Note: use the below to set dropdown value elsewhere if necessary
+    //$('.activity-list-dropdown').setValue("https://openactive.io/activity-list#72d19892-5f55-4e9c-87b0-a5433baa49c8");
+  });
+});
+
+activityListRefresh = 0;
+
+function renderActivityList(localScheme) {
+    activityListRefresh++;
+    var currentSelectedActivity = $('#activity-list-id').val();
+    $('#activity-dropdown').empty();
+    $('#activity-dropdown').append(`<div class="dropdown hierarchy-select row" id="activity-list-dropdown-${activityListRefresh}">
+      <button type="button" class="btn btn-secondary dropdown-toggle form-control ml-1 mr-1" id="activity-list-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+      <div class="dropdown-menu" style="width: 98%;" aria-labelledby="activity-list-button">
+        <div class="hs-searchbox">
+          <input type="text" class="form-control" autocomplete="off">
+        </div>
+        <div class="hs-menu-inner">
+          <a class="dropdown-item" data-value="" data-level="1" data-default-selected="" href="#">- Select Activity -</a>
+        </div>
+      </div>
+      <input name="activity-list-id" id="activity-list-id" readonly="readonly" aria-hidden="true" type="hidden"/> 
+    </div>`);
+    $('#activity-list-id').val(currentSelectedActivity);
+
     // Render the activity list in a format the HierarchySelect will understand
-    $('.activity-list-dropdown .hs-menu-inner').append(renderTree(scheme.getTopConcepts(), 1, []));
-    
+    $(`#activity-list-dropdown-${activityListRefresh} .hs-menu-inner`).append(renderTree(localScheme.getTopConcepts(), 1, []));
+  
     // Initialise the HierarchySelect using the activity list
-    $('.activity-list-dropdown').hierarchySelect({
+    $(`#activity-list-dropdown-${activityListRefresh}`).hierarchySelect({
       width: 'auto',
       
       // Set initial dropdown state based on the hidden field's initial value
@@ -80,19 +109,17 @@ $(function() {
       // Update other elements when a selection is made 
       // (Note the value of the #activity-list-id input is set automatically by HierarchySelect upon selection)
       onChange: function(id) {
-        var concept = scheme.getConceptByID(id);
-        var prefLabel = concept ? concept.prefLabel : "";
-        var definition = concept && concept.definition ? concept.definition : "";
-
-        // Set prefLabel for submitting to server
-        $('#activity-list-prefLabel').val(prefLabel);
+        var concept = localScheme.getConceptByID(id);
       }
     });
-    
-    // Note: use the below to set dropdown value elsewhere if necessary
-    //$('.activity-list-dropdown').setValue("https://openactive.io/activity-list#72d19892-5f55-4e9c-87b0-a5433baa49c8");
-  });
-});
+}
+
+
+function updateActivityList(filterSet) {
+    var filter = Array.from(filterSet);
+    var subsetScheme = scheme.generateSubset(filter);
+    renderActivityList(subsetScheme);
+}
 
 function updateEndpoint() {
     $("#results").empty();
@@ -106,7 +133,7 @@ function updateEndpoint() {
     endpoint = $("#endpoint").val();
     updateParameters("endpoint", endpoint);
     clearForm(endpoint);
-    $("#Vocabulary").val("");
+    $("#Gender").val("");
     $("#TaxonomyTerm").val("");
     $("#Coverage").val("");
 }
@@ -115,7 +142,7 @@ function updateEndpointUpdate() {
 
     if (endpoint !== "") {
         // $("#TaxonomyType").prop('disabled', false);
-        // $("#Vocabulary").prop('disabled', false);
+        // $("#Gender").prop('disabled', false);
         $("#execute").prop('disabled', false);
     }
     if (endpoint === "") {
@@ -183,20 +210,19 @@ function clearForm(endpoint) {
     }
 }
 
-loadedData = {};
-currentStoreId = 0;
-itemCount = 0;
-matchingItemCount = 0;
-harvestStart = luxon.DateTime.now();
-pagesLoaded = 0;
+store = {
+  currentStoreId: 0
+};
+clearStore();
 
 function clearStore() {
-  loadedData = {};
-  currentStoreId++;
-  itemCount = 0;
-  matchingItemCount = 0;
-  harvestStart = luxon.DateTime.now();
-  pagesLoaded = 0;
+  store.loadedData = {};
+  store.currentStoreId++;
+  store.itemCount = 0;
+  store.matchingItemCount = 0;
+  store.harvestStart = luxon.DateTime.now();
+  store.pagesLoaded = 0;
+  store.uniqueActivities = new Set();
 }
 
 loadingTimeout = null;
@@ -226,7 +252,7 @@ function loadingComplete() {
 }
 
 function storeJson(id, json) {
-  loadedData[id] = json;
+  store.loadedData[id] = json;
 }
 
 function getJSON(id) {
@@ -254,7 +280,7 @@ function getVisualise(id, VisType) {
   $("#validateTab").hide();
   $("#richnessTab").hide();
 
-  $("#graph").html(`<pre>${JSON.stringify(loadedData[id], null, 2)}</pre>`);
+  $("#graph").html(`<pre>${JSON.stringify(store.loadedData[id], null, 2)}</pre>`);
 }
 
 
@@ -309,8 +335,9 @@ function executeForm(pageNumber) {
       endTime: $("#EndTime").val(),
       minAge: $("#minAge").val(),
       maxAge: $("#maxAge").val(),
-      vocabulary: $("#Vocabulary").val(),
-      keywords: $("#Keywords").val()
+      gender: $("#Gender").val(),
+      keywords: $("#Keywords").val(),
+      relevantActivitySet: getRelevantActivitySet($('#activity-list-id').val()),
     }
 
     updateScroll();
@@ -324,7 +351,7 @@ function executeForm(pageNumber) {
     loadingStart();
 
     var url = $("#endpoint").val();
-    loadRPDEPage(url, currentStoreId, filters);
+    loadRPDEPage(url, store.currentStoreId, filters);
 
 }
 
@@ -340,18 +367,26 @@ function renderSchedule(value) {
   }
 }
 
+function getRelevantActivitySet(id) {
+  var concept = scheme.getConceptByID(id);
+  if (concept) {
+    return new Set([id].concat(concept.getNarrowerTransitive().map(concept => concept.id)));
+  }
+  return null;
+}
+
 function loadRPDEPage(url, storeId, filters) {
 
   // Another store has been loaded, so do nothing
-  if (storeId !== currentStoreId) {
+  if (storeId !== store.currentStoreId) {
     return;
   }
 
-  pagesLoaded++;
+  store.pagesLoaded++;
 
-  if (pagesLoaded < 50) {
+  if (store.pagesLoaded < 50) {
     addApiPanel(url, true);
-  } else if (pagesLoaded === 50) {
+  } else if (store.pagesLoaded === 50) {
     addApiPanel('Page URLs past this point are hidden for efficiency', false);
   }
 
@@ -363,38 +398,47 @@ function loadRPDEPage(url, storeId, filters) {
       timeout: 30000
   })
       .done(function (data) {
-          if (itemCount === 0) {
+          if (store.itemCount === 0) {
             results.empty();
             results.append("<div id='resultsDiv' class='container-fluid'></div>");
           }
           results = $("#resultsDiv");
 
           $.each(data.content ? data.content : data.items, function (_, value) {
-              itemCount++;
+              store.itemCount++;
               if (value.state === 'updated') {
+
+                // Update activity list
+                var activities = resolveProperty(value, 'activity');
+                if (Array.isArray(activities)) {
+                  activities.map(activity => activity.id || activity['@id']).filter(id => id).forEach(id => store.uniqueActivities.add(id));
+                }
+
                 // Filter
-                var itemMatchesActivity = !filters.activity ? true : (resolveProperty(value, 'activity') || []).filter(x => (x.id || x['@id'] || 'NONE') === filters.activity).length > 0;
+                var itemMatchesActivity = !filters.relevantActivitySet ? true : (resolveProperty(value, 'activity') || []).filter(x => filters.relevantActivitySet.has(x.id || x['@id'] || 'NONE')).length > 0;
                 var itemMatchesDay = !filters.day ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.byDay && x.byDay.includes(filters.day) || x.byDay.includes(filters.day.replace('https', 'http'))).length > 0;
-                if (itemMatchesActivity && itemMatchesDay) {
-                  matchingItemCount++;
+                var itemMatchesGender = !filters.gender ? true : resolveProperty(value, 'genderRestriction') === filters.gender;
+                if (itemMatchesActivity && itemMatchesDay && itemMatchesGender) {
+                  store.matchingItemCount++;
                   
                   storeJson(value.id, value.data);
 
-                  if (matchingItemCount < 100) {
+                  if (store.matchingItemCount < 100) {
                     results.append(
-                        "<div id='col" + matchingItemCount + "' class='row rowhover'>" +
-                        "    <div id='text" + matchingItemCount + "' class='col-md-1 col-sm-2 text-truncate'> " + value.id + "</div>" +
+                        "<div id='col" + store.matchingItemCount + "' class='row rowhover'>" +
+                        "    <div id='text" + store.matchingItemCount + "' class='col-md-1 col-sm-2 text-truncate'> " + value.id + "</div>" +
                         "    <div class='col'>" + resolveProperty(value, 'name')  + "</div>" +
+                        "    <div class='col'>" + (resolveProperty(value, 'activity') || []).filter(x => x.id || x['@id']).map(x => x.prefLabel).join(', ')  + "</div>" +
                         "    <div class='col'>" + renderSchedule(value)  + "</div>" +
                         "    <div class='col'>" + ((value.data && value.data.location && value.data.location.name) || '')  + "</div>" +
                         "    <div class='col'>" +
                         "        <div class='visualise'>" +
                         "            <div class='row'>" +
                         "                <div class='col' style=\"text-align: right\">" +
-                        //"                    <button id='" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 visualiseButton'>Visualise</button>" +
-                        "                    <button id='json" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 '> JSON</button>" +
-                        "                    <button id='validate" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Validate</button>" +
-                        //"                    <button id='richness" + matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Richness</button>" +
+                        //"                    <button id='" + store.matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 visualiseButton'>Visualise</button>" +
+                        "                    <button id='json" + store.matchingItemCount + "' class='btn btn-secondary btn-sm mb-1 '> JSON</button>" +
+                        "                    <button id='validate" + store.matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Validate</button>" +
+                        //"                    <button id='richness" + store.matchingItemCount + "' class='btn btn-secondary btn-sm mb-1'>Richness</button>" +
                         "                </div>" +
                         "            </div>" +
                         "        </div>" +
@@ -402,27 +446,27 @@ function loadRPDEPage(url, storeId, filters) {
                         "</div>"
                     );
 
-                    $("#json" + matchingItemCount).on("click", function () {
+                    $("#json" + store.matchingItemCount).on("click", function () {
                         getJSON(value.id);
                     });
-                    $("#validate" + matchingItemCount).on("click", function () {
+                    $("#validate" + store.matchingItemCount).on("click", function () {
                         openValidator(value.id);
                         //getValidate(value.id);
                     });
-                    $("#richness" + matchingItemCount).on("click", function () {
+                    $("#richness" + store.matchingItemCount).on("click", function () {
                         getRichness(value.id);
                     });
 
                     if (value.id.length > 8) {
-                        $("#col" + matchingItemCount).hover(function () {
-                            $("#text" + matchingItemCount).removeClass("text-truncate");
-                            $("#text" + matchingItemCount).prop("style", "font-size: 70%");
+                        $("#col" + store.matchingItemCount).hover(function () {
+                            $("#text" + store.matchingItemCount).removeClass("text-truncate");
+                            $("#text" + store.matchingItemCount).prop("style", "font-size: 70%");
                         }, function () {
-                            $("#text" + matchingItemCount).addClass("text-truncate");
-                            $("#text" + matchingItemCount).prop("style", "font-size: 100%");
+                            $("#text" + store.matchingItemCount).addClass("text-truncate");
+                            $("#text" + store.matchingItemCount).prop("style", "font-size: 100%");
                         });
                     }
-                  } else if (matchingItemCount === 100) {
+                  } else if (store.matchingItemCount === 100) {
                     results.append(
                       "<div class='row rowhover'>" +
                       "    <div>Only the first 100 items are shown, the rest are hidden (TODO: Add paging)</div>" +
@@ -446,21 +490,22 @@ function loadRPDEPage(url, storeId, filters) {
           }
 
           
-          const elapsed = luxon.DateTime.now().diff(harvestStart, ['seconds']).toObject().seconds;
+          const elapsed = luxon.DateTime.now().diff(store.harvestStart, ['seconds']).toObject().seconds;
           if (url !== data.next) {
-            $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount} in ${elapsed} seconds; Loading...`);
+            $("#progress").text(`Items loaded ${store.itemCount}; results ${store.matchingItemCount} in ${elapsed} seconds; Loading...`);
             loadRPDEPage(data.next, storeId, filters);
           } else {
             loadingComplete();
-            $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount}; Loading complete in ${elapsed} seconds`);
-            if (data.items.length === 0 && matchingItemCount === 0) {
+            updateActivityList(store.uniqueActivities);
+            $("#progress").text(`Items loaded ${store.itemCount}; results ${store.matchingItemCount}; Loading complete in ${elapsed} seconds`);
+            if (data.items.length === 0 && store.matchingItemCount === 0) {
               results.append("<div><p>No results found</p></div>");
             }
           }
       })
       .fail(function () {
-        const elapsed = luxon.DateTime.now().diff(harvestStart, ['seconds']).toObject().seconds;
-        $("#progress").text(`Items loaded ${itemCount}; results ${matchingItemCount} in ${elapsed} seconds; An error occurred, please retry.`);
+        const elapsed = luxon.DateTime.now().diff(store.harvestStart, ['seconds']).toObject().seconds;
+        $("#progress").text(`Items loaded ${store.itemCount}; results ${store.matchingItemCount} in ${elapsed} seconds; An error occurred, please retry.`);
         $("#results").empty().append("An error has occurred");
         $("#results").append('<div><button class="show-error btn btn-secondary">Retry</button></div>');
         $(".show-error").on("click", function () {
@@ -488,7 +533,7 @@ function getRawJSON(id) {
 }
 
 function openValidator(id) {
-  const jsonString = JSON.stringify(loadedData[id], null, 2);
+  const jsonString = JSON.stringify(store.loadedData[id], null, 2);
   const url = `https://validator.openactive.io/#/json/${Base64.encodeURI(jsonString)}`;
   const win = window.open(url, "_blank");
   win.focus();
@@ -736,8 +781,7 @@ function setupPageEndpoints() {
     $("#Keywords").on("change", function () {
         updateKeywords();
     });
-    $("#Vocabulary").on("change", function () {
-        updateVocabulary();
+    $("#Gender").on("change", function () {
     });
     $("#TaxonomyTerm").on("change", function () {
         updateTaxonomyTerm();

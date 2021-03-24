@@ -58,11 +58,14 @@
             <div class="row">
                 <div class="col-sm-4">
                     <div class="row">
-                        <label class="ml-1" for="Vocabulary">Gender</label>
+                        <label class="ml-1" for="Gender">Gender</label>
                     </div>
                     <div class="row">
-                        <select id="Vocabulary" class="form-control mr-1" disabled="disabled">
-                            <option></option>
+                        <select id="Gender" class="form-control mr-1">
+                          <option value=""></option>
+                          <option value="https://openactive.io/NoRestriction">No Restriction</option>
+                          <option value="https://openactive.io/MaleOnly">Male Only</option>
+                          <option value="https://openactive.io/FemaleOnly">Female Only</option>
                         </select>
                     </div>
                 </div>
@@ -72,17 +75,10 @@
                             <div class="row">
                                 <label class="ml-1" for="TaxonomyTerm">Activity</label>
                             </div>
-                            <div class="dropdown hierarchy-select activity-list-dropdown row">
-                              <button type="button" class="btn btn-secondary dropdown-toggle form-control ml-1 mr-1" id="activity-list-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                              <div class="dropdown-menu" aria-labelledby="activity-list-button">
-                                <div class="hs-searchbox">
-                                  <input type="text" class="form-control" autocomplete="off">
-                                </div>
-                                <div class="hs-menu-inner">
-                                  <a class="dropdown-item" data-value="" data-level="1" data-default-selected="" href="#">- Select Activity -</a>
-                                </div>
+                            <div id="activity-dropdown">
+                              <div class="dropdown hierarchy-select activity-list-dropdown row">
+                                <button type="button" class="btn btn-secondary dropdown-toggle form-control ml-1 mr-1">- Select Activity -</button>
                               </div>
-                              <input name="activity-list-id" id="activity-list-id" readonly="readonly" aria-hidden="true" type="hidden"/> 
                             </div>
                         </div>
                         <div class="col" id="ChildChildTaxonomyTermDiv" style="display: none">
@@ -247,7 +243,7 @@
         
 <script src="https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@openactive/skos/dist/skos.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@openactive/skos@1.4.3/dist/skos.min.js"></script>
 <script src="https://neofusion.github.io/hierarchy-select/v2/dist/hierarchy-select.min.js"></script>
 <script src="apisearch.js"></script>
 
