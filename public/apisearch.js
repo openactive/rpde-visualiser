@@ -437,13 +437,16 @@ function loadRPDEPage(url, storeId, filters) {
                 var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime == filters.startTime).length > 0;
                 var itemEndTime = !filters.endTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.endTime == filters.endTime).length > 0;
 
+                var itemMinAge = !filters.minAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.minValue) >= parseInt(filters.minAge);
+                var itemMaxAge = !filters.maxAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.maxValue) <= parseInt(filters.maxAge);
+
                 var itemOrganization = !filters.organisation || filters.organisation == "Any" ? true : value.data && value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.organisation.toLowerCase());
 
                 var itemCoverage = !filters.coverage ? true : filters.coverage && !filters.proximity ? isValidPostCode(value, filters.coverage) : isValidPostCodeWithProximity(value, filters.coverage, filters.proximity);
 
                 var itemProximity = !filters.proximity ? true : filters.coverage && filters.proximity ? isValidPostCodeWithProximity(value, filters.coverage, filters.proximity) : isValidProximity(value, filters.proximity)
 
-                if (itemMatchesActivity && itemMatchesDay && itemMatchesGender && itemkeyWords && itemStartTime && itemEndTime && itemOrganization && itemCoverage && itemProximity) {
+                  if (itemMatchesActivity && itemMatchesDay && itemMatchesGender && itemkeyWords && itemStartTime && itemEndTime && itemMinAge && itemMaxAge && itemOrganization && itemCoverage && itemProximity) {
                   store.matchingItemCount++;
                   
                   storeJson(value.id, value.data);
