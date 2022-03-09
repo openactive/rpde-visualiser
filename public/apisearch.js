@@ -16,7 +16,10 @@ let viz1;
 let taxonomys;
 let config;
 let store;
-
+let currentPostcode;
+let currentLatitude;
+let currentLongitude;
+var map = new LeafletMapGeocoder('e596b6b1e3d14286ba1376e059f91388');
 // This demo is based on https://neofusion.github.io/hierarchy-select/
 
 // Using source files:
@@ -337,6 +340,8 @@ function executeForm(pageNumber) {
       maxAge: $("#maxAge").val(),
       gender: $("#Gender").val(),
       keywords: $("#Keywords").val(),
+      organisation: $("#TaxonomyType").val(),
+
       relevantActivitySet: getRelevantActivitySet($('#activity-list-id').val()),
     }
 
@@ -351,9 +356,29 @@ function executeForm(pageNumber) {
     loadingStart();
 
     var url = $("#endpoint").val();
-    loadRPDEPage(url, store.currentStoreId, filters);
+    if(filters.coverage && filters.proximity && currentPostcode != filters.coverage){
+        map.geocode(filters.coverage, function(geo, country, timezone) {
+            currentLatitude = geo.lat;
+            currentLongitude = geo.lng;
+            currentPostcode = filters.coverage;
+            loadRPDEPage(url, store.currentStoreId, filters);
+        });
+      }else{
+        loadRPDEPage(url, store.currentStoreId, filters);
+      }    
 
 }
+
+// if (navigator.geolocation) {
+//     navigator.geolocation.getCurrentPosition(position => {
+//         currentLatitude = position.coords.latitude;
+//         currentLongitude = position.coords.longitude;
+//         console.log('current Latitude: ', currentLatitude);
+//         console.log('current Longitude: ', currentLongitude);
+//     }, error => {
+//         console.log('Need access to get location.');
+//     });
+// }
 
 function resolveProperty(value, prop) {
   return value.data && (value.data.superEvent && value.data.superEvent[prop] || value.data[prop]);
@@ -418,7 +443,20 @@ function loadRPDEPage(url, storeId, filters) {
                 var itemMatchesActivity = !filters.relevantActivitySet ? true : (resolveProperty(value, 'activity') || []).filter(x => filters.relevantActivitySet.has(x.id || x['@id'] || 'NONE')).length > 0;
                 var itemMatchesDay = !filters.day ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.byDay && x.byDay.includes(filters.day) || x.byDay.includes(filters.day.replace('https', 'http'))).length > 0;
                 var itemMatchesGender = !filters.gender ? true : resolveProperty(value, 'genderRestriction') === filters.gender;
-                if (itemMatchesActivity && itemMatchesDay && itemMatchesGender) {
+				var itemkeyWords = !filters.keywords ? true : value.data && (value.data.name.toLowerCase().includes(filters.keywords.toLowerCase()) || value.data.description.toLowerCase().includes(filters.keywords.toLowerCase())) || (value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.keywords.toLowerCase()));
+                var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime == filters.startTime).length > 0;
+                var itemEndTime = !filters.endTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.endTime == filters.endTime).length > 0;
+
+                var itemMinAge = !filters.minAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.minValue) <= parseInt(filters.minAge);
+                var itemMaxAge = !filters.maxAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.maxValue) >= parseInt(filters.maxAge);
+
+                var itemOrganization = !filters.organisation || filters.organisation == "Any" ? true : value.data && value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.organisation.toLowerCase());
+
+                var itemCoverage = !filters.coverage ? true : filters.coverage && !filters.proximity ? isValidPostCode(value, filters.coverage) : isValidPostCodeWithProximity(value, filters.coverage, filters.proximity);
+
+                var itemProximity = !filters.proximity ? true : filters.coverage && filters.proximity ? isValidPostCodeWithProximity(value, filters.coverage, filters.proximity) : isValidProximity(value, filters.proximity)
+
+                  if (itemMatchesActivity && itemMatchesDay && itemMatchesGender && itemkeyWords && itemStartTime && itemEndTime && itemMinAge && itemMaxAge && itemOrganization && itemCoverage && itemProximity) {
                   store.matchingItemCount++;
                   
                   storeJson(value.id, value.data);
@@ -512,6 +550,67 @@ function loadRPDEPage(url, storeId, filters) {
             executeForm();
         });
       });
+}
+function isValidPostCode(value, filterCoverage) {
+    return value.data && value.data.location && value.data.location.address && value.data.location.address.toLowerCase().includes(filterCoverage.toLowerCase());
+}
+
+function isValidPostCodeWithProximity(value, filterCoverage, filterProximity) {
+
+    var isExits = value.data && value.data.location && value.data.location.address && value.data.location.address.toLowerCase().includes(filterCoverage.toLowerCase());
+    if (isExits) {
+        return getIsValidDistance(value, filterProximity);
+    }
+    else {
+        return isValidProximity(value, filterProximity);
+    }
+}
+
+function isValidProximity(value, filterProximity) {
+    var isLatLngExits = value.data && value.data.location && value.data.location.geo;
+    if (isLatLngExits) {
+        return getIsValidDistance(value, filterProximity);
+    }
+    else {
+        return false
+    }
+}
+
+function getIsValidDistance(value, filterProximity) {
+    var sessionlatitude = value.data.location.geo ? value.data.location.geo.latitude : null;
+    var sessionlongitude = value.data.location.geo ? value.data.location.geo.longitude : null;
+    if (sessionlatitude != null && sessionlongitude != null && currentLatitude != null && currentLongitude != null) {
+        var distance = proximityDistance(currentLatitude, sessionlatitude, currentLongitude, sessionlongitude);
+        if (distance <= parseFloat(filterProximity)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else {
+        return false;
+    }
+}
+
+function proximityDistance(lat1, lat2, lon1, lon2) {
+
+    var R = 6371; // km 
+    //has a problem with the .toRad() method below.
+    var x1 = lat2 - lat1;
+    var dLat = x1.toRad();
+    var x2 = lon2 - lon1;
+    var dLon = x2.toRad();
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;
+}
+
+Number.prototype.toRad = function () {
+    return this * Math.PI / 180;
 }
 
 function populateEndpointsFromJson() {
@@ -842,3 +941,56 @@ function setupPageEndpoints() {
 $(function () {
     setupPage()
 });
+
+function LeafletMapGeocoder(apikey) {
+    var self = this;
+    self.geocode = function geocode(query, callback) {
+        if (query == null || typeof query !== 'string' || query.trim().length == 0) {
+        alert("Please enter an address.")
+        } else {
+        // Call the OpenCage Geocoder
+        $.ajax({
+            url: 'https://api.opencagedata.com/geocode/v1/json',
+            method: 'GET',
+            data: {
+            'key': 'e596b6b1e3d14286ba1376e059f91388',
+            'q': query
+            // see other optional params:
+            // https://opencagedata.com/api#forward-opt
+            },
+            dataType: 'json',
+            statusCode: {
+            200: function(response) { // success
+                if (response.results.length == 0) {
+                alert("Address not found");
+                } else {
+                var country = null;
+                var timezone = null;
+                // Extract the country code from the results
+                if (response.results[0].components && response.results[0].components.country_code && typeof response.results[0].components.country_code === 'string') {
+                    country = response.results[0].components.country_code.toUpperCase();
+                }
+                // Extract the timezone from the results
+                if (response.results[0].annotations && response.results[0].annotations.timezone && response.results[0].annotations.timezone.name) {
+                    timezone = response.results[0].annotations.timezone.name;
+                }
+                callback(response.results[0].geometry, country, timezone);
+                }
+            },
+            401: function() {
+                alert('This feature is unavailable, please contact support.');
+                console.log('invalid API key');
+                console.log('get a free trial: https://opencagedata.com/pricing');
+            },
+            402: function() {
+                alert('This feature is unavailable today. Please try again tomorrow.');
+                console.log('hit free-trial daily limit');
+                console.log('become a customer: https://opencagedata.com/pricing');
+            }
+            // other possible response codes:
+            // https://opencagedata.com/api#codes
+            }
+        });
+        }
+    }
+}
