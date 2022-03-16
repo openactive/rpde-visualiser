@@ -444,8 +444,9 @@ function loadRPDEPage(url, storeId, filters) {
                 var itemMatchesDay = !filters.day ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.byDay && x.byDay.includes(filters.day) || x.byDay.includes(filters.day.replace('https', 'http'))).length > 0;
                 var itemMatchesGender = !filters.gender ? true : resolveProperty(value, 'genderRestriction') === filters.gender;
 				var itemkeyWords = !filters.keywords ? true : value.data && (value.data.name.toLowerCase().includes(filters.keywords.toLowerCase()) || value.data.description.toLowerCase().includes(filters.keywords.toLowerCase())) || (value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.keywords.toLowerCase()));
-                var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime == filters.startTime).length > 0;
-                var itemEndTime = !filters.endTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.endTime == filters.endTime).length > 0;
+
+                var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime.includes(filters.startTime)).length > 0;
+                var itemEndTime = !filters.endTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.endTime.includes(filters.endTime)).length > 0;
 
                 var itemMinAge = !filters.minAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.minValue) <= parseInt(filters.minAge);
                 var itemMaxAge = !filters.maxAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.maxValue) >= parseInt(filters.maxAge);
