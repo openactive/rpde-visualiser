@@ -443,7 +443,7 @@ function loadRPDEPage(url, storeId, filters) {
                 var itemMatchesActivity = !filters.relevantActivitySet ? true : (resolveProperty(value, 'activity') || []).filter(x => filters.relevantActivitySet.has(x.id || x['@id'] || 'NONE')).length > 0;
                 var itemMatchesDay = !filters.day ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.byDay && x.byDay.includes(filters.day) || x.byDay.includes(filters.day.replace('https', 'http'))).length > 0;
                 var itemMatchesGender = !filters.gender ? true : resolveProperty(value, 'genderRestriction') === filters.gender;
-				var itemkeyWords = !filters.keywords ? true : value.data && (value.data.name.toLowerCase().includes(filters.keywords.toLowerCase()) || value.data.description.toLowerCase().includes(filters.keywords.toLowerCase())) || (value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.keywords.toLowerCase()));
+		var itemkeyWords = containsKeywords(value.data, filters.keywords);
 
                 var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime.includes(filters.startTime)).length > 0;
                 var itemEndTime = !filters.endTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.endTime.includes(filters.endTime)).length > 0;
@@ -554,7 +554,7 @@ function loadRPDEPage(url, storeId, filters) {
 }
 function isValidPostCode(value, filterCoverage) {
     return value.data && value.data.location && value.data.location.address && value.data.location.address.postalCode
-	    && value.data.location.address.postalCode.toLowerCase().includes(filterCoverage.toLowerCase());
+	    && value.data.location.address.postalCode.toLowerCase().startsWith(filterCoverage.toLowerCase());
 }
 
 function isValidProximity(value, filterProximity) {
@@ -581,6 +581,35 @@ function getIsValidDistance(value, filterProximity) {
     }
     else {
         return false;
+    }
+}
+
+function containsKeywords(value, keywords) {
+    if (!value) {
+        return false;
+    } else if (!keywords) {
+        return true;
+    }
+    var keywordArray = keywords.split(" ");
+    return !filters.keywords ? true : checkForKeywords(value.name, keywords)
+        || (value.description && checkForKeywords(value.description, keywords))
+	|| (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywords));
+}
+
+function checkForKeywords(value, keywords) {
+    if (!value || !keywords){
+        return false;
+    }
+    if (Array.isArray(keywords)) {
+	for (var i = 0; i < keywords.length; i++) {
+	    if (checkForKeywords(value, keywords) {
+		return true;
+	    }
+	}
+    } else if (typeof keywords === 'string') {
+        return value.toLowerCase().includes(keywords.toLowerCase());
+    } else {
+	return false;    
     }
 }
 
