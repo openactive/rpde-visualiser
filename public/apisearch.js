@@ -610,7 +610,7 @@ function containsKeywords(value, keywords) {
 
 function getMissingKeywords(value, keywords) {
     if (!keywords || keywords.length == 0) {
-        return new [];
+        return [];
     } else if (!value) {
         return keywords;
     }
