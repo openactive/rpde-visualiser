@@ -591,11 +591,6 @@ function containsKeywords(value, keywords) {
         return true;
     }
     var keywordArray = keywords.split(" ");
-    if (keywordArray.length == 1) {
-        return checkForKeywords(value.name, keywordArray[0])
-            || (value.description && checkForKeywords(value.description, keywordArray[0]))
-	    || (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywordArray[0]));
-    }
     var missingKeywords = getMissingKeywords(value.name, keywordArray);
     if (missingKeywords.length == 0) {
 	return true;	
