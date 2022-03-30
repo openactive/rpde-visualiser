@@ -453,9 +453,9 @@ function loadRPDEPage(url, storeId, filters) {
 
                 var itemOrganization = !filters.organisation || filters.organisation == "Any" ? true : value.data && value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.organisation.toLowerCase());
 
-                var itemCoverage = !filters.coverage ? true : filters.coverage && !filters.proximity ? isValidPostCode(value, filters.coverage) : isValidPostCodeWithProximity(value, filters.coverage, filters.proximity);
+                var itemCoverage = !filters.coverage || filters.proximity ? true : isValidPostCode(value, filters.coverage);
 
-                var itemProximity = !filters.proximity ? true : filters.coverage && filters.proximity ? isValidPostCodeWithProximity(value, filters.coverage, filters.proximity) : isValidProximity(value, filters.proximity)
+                var itemProximity = !filters.proximity ? true : isValidProximity(value, filters.proximity);
 
                   if (itemMatchesActivity && itemMatchesDay && itemMatchesGender && itemkeyWords && itemStartTime && itemEndTime && itemMinAge && itemMaxAge && itemOrganization && itemCoverage && itemProximity) {
                   store.matchingItemCount++;
@@ -553,18 +553,7 @@ function loadRPDEPage(url, storeId, filters) {
       });
 }
 function isValidPostCode(value, filterCoverage) {
-    return value.data && value.data.location && value.data.location.address && value.data.location.address.toLowerCase().includes(filterCoverage.toLowerCase());
-}
-
-function isValidPostCodeWithProximity(value, filterCoverage, filterProximity) {
-
-    var isExits = value.data && value.data.location && value.data.location.address && value.data.location.address.toLowerCase().includes(filterCoverage.toLowerCase());
-    if (isExits) {
-        return getIsValidDistance(value, filterProximity);
-    }
-    else {
-        return isValidProximity(value, filterProximity);
-    }
+    return value.data && value.data.location && value.data.location.address && value.data.location.address.postalCode.toLowerCase().includes(filterCoverage.toLowerCase());
 }
 
 function isValidProximity(value, filterProximity) {
