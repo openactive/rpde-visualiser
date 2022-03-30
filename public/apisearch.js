@@ -448,8 +448,8 @@ function loadRPDEPage(url, storeId, filters) {
                 var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime.includes(filters.startTime)).length > 0;
                 var itemEndTime = !filters.endTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.endTime.includes(filters.endTime)).length > 0;
 
-                var itemMinAge = !filters.minAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.minValue) <= parseInt(filters.minAge);
-                var itemMaxAge = !filters.maxAge ? true : value.data && value.data.ageRange && parseInt(value.data.ageRange.maxValue) >= parseInt(filters.maxAge);
+                var itemMinAge = !filters.minAge ? true : checkMinAge(value.data, filters.minAge);
+                var itemMaxAge = !filters.maxAge ? true : checkMaxAge(value.data, filters.maxAge);
 
                 var itemOrganization = !filters.organisation || filters.organisation == "Any" ? true : value.data && value.data.organizer && value.data.organizer.name.toLowerCase().includes(filters.organisation.toLowerCase());
 
@@ -642,6 +642,38 @@ function checkForKeywords(value, keywords) {
     } else {
 	return false;    
     }
+}
+
+function checkMinAge(value, minAge) {
+    if (!value) {
+	return false;    
+    } else if (!minAge) {
+	return true;    
+    }
+    try {
+        if (value.ageRange) {
+            return parseInt(value.ageRange.minValue) <= parseInt(minAge);
+        } else if (value.superEvent && value.superEvent.ageRange) {
+	    return parseInt(value.superEvent.ageRange.minValue) <= parseInt(minAge);
+        }
+    } catch () { }
+    return false;
+}
+
+function checkMaxAge(value, maxAge) {
+    if (!value) {
+	return false;    
+    } else if (!maxAge) {
+	return true;    
+    }
+    try {
+        if (value.ageRange) {
+            return parseInt(value.ageRange.maxValue) >= parseInt(maxAge);
+        } else if (value.superEvent && value.superEvent.ageRange) {
+	    return parseInt(value.superEvent.ageRange.maxValue) >= parseInt(maxAge);
+        }
+    }
+    return false;
 }
 
 function proximityDistance(lat1, lat2, lon1, lon2) {
