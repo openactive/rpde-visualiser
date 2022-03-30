@@ -591,9 +591,9 @@ function containsKeywords(value, keywords) {
         return true;
     }
     var keywordArray = keywords.split(" ");
-    return checkForKeywords(value.name, keywords)
-        || (value.description && checkForKeywords(value.description, keywords))
-	|| (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywords));
+    return checkForKeywords(value.name, keywordArray)
+        || (value.description && checkForKeywords(value.description, keywordArray))
+	|| (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywordArray));
 }
 
 function checkForKeywords(value, keywords) {
