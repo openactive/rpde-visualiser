@@ -656,7 +656,7 @@ function checkMinAge(value, minAge) {
         } else if (value.superEvent && value.superEvent.ageRange) {
 	    return parseInt(value.superEvent.ageRange.minValue) <= parseInt(minAge);
         }
-    } catch () { }
+    } catch (error) { }
     return false;
 }
 
@@ -672,7 +672,7 @@ function checkMaxAge(value, maxAge) {
         } else if (value.superEvent && value.superEvent.ageRange) {
 	    return parseInt(value.superEvent.ageRange.maxValue) >= parseInt(maxAge);
         }
-    }
+    } catch (error) { }
     return false;
 }
 
