@@ -553,7 +553,8 @@ function loadRPDEPage(url, storeId, filters) {
       });
 }
 function isValidPostCode(value, filterCoverage) {
-    return value.data && value.data.location && value.data.location.address && value.data.location.address.postalCode.toLowerCase().includes(filterCoverage.toLowerCase());
+    return value.data && value.data.location && value.data.location.address && value.data.location.address.postalCode
+	    && value.data.location.address.postalCode.toLowerCase().includes(filterCoverage.toLowerCase());
 }
 
 function isValidProximity(value, filterProximity) {
