@@ -612,6 +612,18 @@ function containsKeywords(value, keywords) {
     if (missingKeywords.length == 0) {
 	return true;	
     }
+    if (value.superEvent && value.superEvent.name){
+        missingKeywords = getMissingKeywords(value.superEvent.name, missingKeywords);
+    }
+    if (missingKeywords.length == 0) {
+	return true;	
+    }
+    if (value.superEvent && value.superEvent.description){
+        missingKeywords = getMissingKeywords(value.superEvent.description, missingKeywords);
+    }
+    if (missingKeywords.length == 0) {
+	return true;	
+    }
     return false;
 }
 
