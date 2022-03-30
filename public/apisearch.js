@@ -590,26 +590,14 @@ function containsKeywords(value, keywords) {
     }
     var keywordArray = keywords.split(" ");
     var missingKeywords = getMissingKeywords(value.name, keywordArray);
-    if (missingKeywords.length == 0) {
-        return true;
-    }
     if (value.description) {
         missingKeywords = getMissingKeywords(value.description, missingKeywords);
-    }
-    if (missingKeywords.length == 0) {
-        return true;
     }
     if (value.organizer && value.organizer.name) {
         missingKeywords = getMissingKeywords(value.organizer.name, missingKeywords);
     }
-    if (missingKeywords.length == 0) {
-        return true;
-    }
     if (value.superEvent && value.superEvent.name) {
         missingKeywords = getMissingKeywords(value.superEvent.name, missingKeywords);
-    }
-    if (missingKeywords.length == 0) {
-        return true;
     }
     if (value.superEvent && value.superEvent.description) {
         missingKeywords = getMissingKeywords(value.superEvent.description, missingKeywords);
@@ -621,7 +609,7 @@ function containsKeywords(value, keywords) {
 }
 
 function getMissingKeywords(value, keywords) {
-    if (!keywords) {
+    if (!keywords || keywords.length == 0) {
         return new [];
     } else if (!value) {
         return keywords;
