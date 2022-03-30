@@ -602,7 +602,7 @@ function checkForKeywords(value, keywords) {
     }
     if (Array.isArray(keywords)) {
 	for (var i = 0; i < keywords.length; i++) {
-	    if (checkForKeywords(value, keywords)) {
+	    if (checkForKeywords(value, keywords[i])) {
 		return true;
 	    }
 	}
