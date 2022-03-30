@@ -591,7 +591,7 @@ function containsKeywords(value, keywords) {
         return true;
     }
     var keywordArray = keywords.split(" ");
-    return !filters.keywords ? true : checkForKeywords(value.name, keywords)
+    return checkForKeywords(value.name, keywords)
         || (value.description && checkForKeywords(value.description, keywords))
 	|| (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywords));
 }
@@ -602,7 +602,7 @@ function checkForKeywords(value, keywords) {
     }
     if (Array.isArray(keywords)) {
 	for (var i = 0; i < keywords.length; i++) {
-	    if (checkForKeywords(value, keywords) {
+	    if (checkForKeywords(value, keywords)) {
 		return true;
 	    }
 	}
