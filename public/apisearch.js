@@ -591,9 +591,44 @@ function containsKeywords(value, keywords) {
         return true;
     }
     var keywordArray = keywords.split(" ");
-    return checkForKeywords(value.name, keywordArray)
-        || (value.description && checkForKeywords(value.description, keywordArray))
-	|| (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywordArray));
+    if (keywordArray.length == 1) {
+        return checkForKeywords(value.name, keywordArray[0])
+            || (value.description && checkForKeywords(value.description, keywordArray[0]))
+	    || (value.organizer && value.organizer.name && checkForKeywords(value.organizer.name, keywordArray[0]));
+    }
+    var missingKeywords = getMissingKeywords(value.name, keywordArray);
+    if (missingKeywords.length == 0) {
+	return true;	
+    }
+    if (value.description) {
+	missingKeywords = getMissingKeywords(value.description, missingKeywords);
+    }
+    if (missingKeywords.length == 0) {
+	return true;	
+    }
+    if (value.organizer && value.organizer.name){
+        missingKeywords = getMissingKeywords(value.organizer.name, missingKeywords);
+    }
+    if (missingKeywords.length == 0) {
+	return true;	
+    }
+    return false;
+}
+
+function getMissingKeywords(value, keywords) {
+    if (!keywords) {
+        return new [];
+    } else if (!value) {
+        return keywords;
+    }
+    let missingKeywords = keywords;
+    for (var i = 0; i < missingKeywords.length; i++) {
+	if (checkForKeywords(value, missingKeywords[i])) {
+            missingKeywords = missingKeywords.filter(e => e !== missingKeywords[i]);
+	    i--;
+	}
+    }
+    return missingKeywords;
 }
 
 function checkForKeywords(value, keywords) {
@@ -601,11 +636,7 @@ function checkForKeywords(value, keywords) {
         return false;
     }
     if (Array.isArray(keywords)) {
-	for (var i = 0; i < keywords.length; i++) {
-	    if (checkForKeywords(value, keywords[i])) {
-		return true;
-	    }
-	}
+	return getMissingKeywords(value, keywords);
     } else if (typeof keywords === 'string') {
         return value.toLowerCase().includes(keywords.toLowerCase());
     } else {
