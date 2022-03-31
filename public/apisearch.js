@@ -1,10 +1,6 @@
 let endpoint;
-let taxonomyType;
-let vocabulary;
-let taxonomyTerm;
 let proximity;
 let coverage;
-let childTaxonomyTerm;
 let childChildTaxonomyTerm;
 let day;
 let startTime;
@@ -12,8 +8,6 @@ let endTime;
 let keywords;
 let minAge;
 let maxAge;
-let viz1;
-let taxonomys;
 let config;
 let store;
 let currentPostcode;
@@ -340,8 +334,7 @@ function executeForm(pageNumber) {
         maxAge: $("#maxAge").val(),
         gender: $("#Gender").val(),
         keywords: $("#Keywords").val(),
-        organisation: $("#TaxonomyType").val(),
-
+        organiserName: $("#OrganiserName").val(),
         relevantActivitySet: getRelevantActivitySet($('#activity-list-id').val()),
     }
 
@@ -443,6 +436,7 @@ function loadRPDEPage(url, storeId, filters) {
                     var itemMatchesActivity = !filters.relevantActivitySet ? true : (resolveProperty(value, 'activity') || []).filter(x => filters.relevantActivitySet.has(x.id || x['@id'] || 'NONE')).length > 0;
                     var itemMatchesDay = !filters.day ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.byDay && x.byDay.includes(filters.day) || x.byDay.includes(filters.day.replace('https', 'http'))).length > 0;
                     var itemMatchesGender = !filters.gender ? true : resolveProperty(value, 'genderRestriction') === filters.gender;
+                    var itemOrganiserName = matchesOrganiserName(value.data, filters.organiserName);
                     var itemkeyWords = containsKeywords(value.data, filters.keywords);
 
                     var itemStartTime = !filters.startTime ? true : value.data && value.data.eventSchedule && value.data.eventSchedule.filter(x => x.startTime.includes(filters.startTime)).length > 0;
@@ -582,6 +576,28 @@ function getIsValidDistance(value, filterProximity) {
     }
 }
 
+function matchesOrganiserName(value, organiserName) {
+    if (!value) {
+        return false;
+    } else if (!organiserName) {
+        return true;
+    }
+    var organiserNameArray = organiserName.split(" ");
+    if (value.organizer && value.organizer.name) {
+        let missingParts = getMissingKeywords(value.organizer.name, organiserNameArray);
+        if (missingParts.length == 0) {
+            return true;
+        }
+    }
+    if (value.superEvent && value.superEvent.organizer && value.superEvent.organizer.name) {
+        let missingParts = getMissingKeywords(value.superEvent.organizer.name, organiserNameArray);
+        if (missingParts.length == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function containsKeywords(value, keywords) {
     if (!value) {
         return false;
@@ -592,9 +608,6 @@ function containsKeywords(value, keywords) {
     var missingKeywords = getMissingKeywords(value.name, keywordArray);
     if (value.description) {
         missingKeywords = getMissingKeywords(value.description, missingKeywords);
-    }
-    if (value.organizer && value.organizer.name) {
-        missingKeywords = getMissingKeywords(value.organizer.name, missingKeywords);
     }
     if (value.superEvent && value.superEvent.name) {
         missingKeywords = getMissingKeywords(value.superEvent.name, missingKeywords);
