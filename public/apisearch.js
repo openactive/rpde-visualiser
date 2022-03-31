@@ -451,7 +451,7 @@ function loadRPDEPage(url, storeId, filters) {
 
                     var itemProximity = !filters.proximity ? true : isValidProximity(value, filters.proximity);
 
-                    if (itemMatchesActivity && itemMatchesDay && itemMatchesGender && itemkeyWords && itemStartTime && itemEndTime && itemMinAge && itemMaxAge && itemOrganization && itemCoverage && itemProximity) {
+                    if (itemMatchesActivity && itemMatchesDay && itemMatchesGender && itemkeyWords && itemStartTime && itemEndTime && itemMinAge && itemMaxAge && itemOrganization && itemCoverage && itemProximity && itemOrganiserName) {
                         store.matchingItemCount++;
 
                         storeJson(value.id, value.data);
