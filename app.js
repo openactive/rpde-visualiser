@@ -106,7 +106,7 @@ app.get('/fetch', cacheSuccesses, async(req, res, next) => {
       }))).filter(x => x);
       datasets =  datasetSites.map(site => ({
         name: site.name + ' (SessionSeries)',
-        url: site.distribution.filter(x => x.additionalType === 'https://openactive.io/SessionSeries' && x.contentUrl.indexOf('legendonlineservices') < 0).map(x => x.contentUrl)[0]
+        url: (site?.distribution ?? []).filter(x => x.additionalType === 'https://openactive.io/SessionSeries' && x.contentUrl.indexOf('legendonlineservices') < 0).map(x => x.contentUrl)[0]
       })).filter(x => x.url && x.name.substr(0,1).trim()).sort((a,b) => ('' + a.name).localeCompare(b.name));
       console.log("Got all dataset sites: " + JSON.stringify(datasets, null, 2));
 
