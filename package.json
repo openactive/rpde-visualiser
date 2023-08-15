@@ -1,22 +1,27 @@
 {
   "name": "rpde-visualiser",
-  "version": "1.0.0",
-  "description": "Visualiser of RPDE feeds",
+  "version": "1.1.0",
+  "description": "Data Visualiser for RPDE feeds, including Data Quality Metrics",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Nick Evans",
+  "author": "Howard Askew",
   "license": "MIT",
   "dependencies": {
+    "apexcharts": "^3.37.3",
     "apicache": "^1.6.2",
     "axios": "^0.21.1",
+    "body-parser": "^1.20.1",
+    "dotenv": "^16.3.1",
     "express": "^4.17.1",
     "htmlmetaparser": "^2.1.1",
-    "htmlparser2": "^6.0.1"
+    "htmlparser2": "^6.0.1",
+    "pg": "^8.11.0"
   },
   "engines": {
-    "node": "14.15.0"
+    "node": "19.6.0",
+    "npm": "9.4.0"
   }
 }
