@@ -1,251 +1,415 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 
-    <script src="https://tools.openreferraluk.org/ApiQuery/js/lib/viz-js/viz.js"></script>
+    <!-- <script src="https://tools.openreferraluk.org/ApiQuery/js/lib/viz-js/viz.js"></script>-->
 
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700&display=swap">
     <link rel="stylesheet" href="https://neofusion.github.io/hierarchy-select/v2/dist/hierarchy-select.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <title>OpenActive Data Visualiser</title>
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
+
+    <title>OpenActive Data Quality Explorer</title>
+    <link rel="icon" type="image/png" href="https://www.openactive.io/wp-content/themes/open-active-1_3/images/favicon.png">
 </head>
-<body>
-<div class="mainheading">
-    <h3>OpenActive Data Visualiser</h3>
-</div>
 
-<div class="container-fluid" style="padding-left: 5%; padding-right: 5%">
-    <div class="row">
-        <div class="col-md-6 col-sm-8">
-            <div class="row">
-                <label class="ml-1" for="endpoint">Endpoint</label>
-                <select id="endpoint" class="form-control"></select>
-            </div>
-            <div class="row">
-                <h5 style="padding-top: 1%">
-                    Get services
-                </h5>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="TaxonomyType">Organization</label>
-                    </div>
-                    <div class="row">
-                        <select id="TaxonomyType" class="form-control mr-1" disabled="disabled">
-                            <option>Any</option>
-                            <option value="area">Area</option>
-                            <option value="cost">Cost</option>
-                            <option value="eligibility">Eligibility</option>
-                            <option value="organization">Organization</option>
-                            <option value="service">Service</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-8">
-                    <div class="row">
-                        <label class="ml-1" for="Keywords">Keywords</label>
-                    </div>
-                    <div class="row">
-                        <input id="Keywords" class="form-control ml-1" disabled="disabled">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="Gender">Gender</label>
-                    </div>
-                    <div class="row">
-                        <select id="Gender" class="form-control mr-1">
-                          <option value=""></option>
-                          <option value="https://openactive.io/NoRestriction">No Restriction</option>
-                          <option value="https://openactive.io/MaleOnly">Male Only</option>
-                          <option value="https://openactive.io/FemaleOnly">Female Only</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-8">
-                    <div class="row">
-                        <div class="col">
-                            <div class="row">
-                                <label class="ml-1" for="TaxonomyTerm">Activity</label>
-                            </div>
-                            <div id="activity-dropdown">
-                              <div class="dropdown hierarchy-select activity-list-dropdown row">
-                                <button type="button" class="btn btn-secondary dropdown-toggle form-control ml-1 mr-1">- Select Activity -</button>
-                              </div>
-                            </div>
-                        </div>
-                        <div class="col" id="ChildChildTaxonomyTermDiv" style="display: none">
-                            <div class="row">
-                                <label for="ChildChildTaxonomyTerm">Child term</label>
-                            </div>
-                            <div class="row">
-                                <select id="ChildChildTaxonomyTerm" class="form-control ml-1" disabled="disabled">
-                                    <option></option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="RegularScheduleRow" class="row">
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="Day">Day</label>
-                    </div>
-                    <div class="row">
-                        <select id="Day" class="form-control mr-1">
-                            <option value=""></option>
-                            <option value="https://schema.org/Monday">Monday</option>
-                            <option value="https://schema.org/Tuesday">Tuesday</option>
-                            <option value="https://schema.org/Wednesday">Wednesday</option>
-                            <option value="https://schema.org/Thursday">Thursday</option>
-                            <option value="https://schema.org/Friday">Friday</option>
-                            <option value="https://schema.org/Saturday">Saturday</option>
-                            <option value="https://schema.org/Sunday">Sunday</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="StartTime">Start time</label>
-                    </div>
-                    <div class="row">
-                        <input id="StartTime" type="time" class="form-control ml-1 mr-1" disabled="disabled">
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="EndTime">End time</label>
-                    </div>
-                    <div class="row">
-                        <input id="EndTime" type="time" class="form-control ml-1 mr-1" disabled="disabled">
-                    </div>
-                </div>
-            </div>
-            <div class="row" id="CoverageRow">
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="Coverage">Coverage (postcode)</label>
-                    </div>
-                    <div class="row">
-                        <input id="Coverage" class="form-control mr-1" disabled="disabled">
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1" for="Proximity">Proximity (km)</label>
-                    </div>
-                    <div class="row">
-                        <input id="Proximity" type="number" class="form-control ml-1 mr-1" disabled="disabled">
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="row">
-                        <label class="ml-1">Min/Max age</label>
-                        <label class="sr-only" for="minAge">Min age</label>
-                        <label class="sr-only" for="maxAge">Max age</label>
-                    </div>
-                    <div class="row">
-                        <div class="input-group">
-                            <input id="minAge" type="number" class="form-control ml-1" disabled="disabled">
-                            <input id="maxAge" type="number" class="form-control mr-1" disabled="disabled">
-                        </div>
-                    </div>
-                </div>
-            </div>
+<body style="overflow-y: scroll">
 
-            <div class="row" style="padding-top: 3%">
-                <div class="col-sm-8 pl-0 pr-0">
-                    <button id="execute" class="btn btn-success form-control" disabled="disabled">
-                        Execute query
-                    </button>
+    <!-- Header image and text -->
+    <div id="mainheading" class="section">
+        <div class="flex-row">
+            <div id="mainlogo" class="col-md-6 col-sm-8 top-auto bottom-auto left-right-auto">
+                <img src="images/OpenActive-Landscape-Logo-White.svg" class="col-sm-12" style="max-height:80px;"></img>
+            </div>
+            <div id="maintext" class="col-md-6 col-sm-8 top-auto bottom-auto left-right-auto">
+                <div class="col-sm-12 flex-row" style="justify-content: space-between";>
+                    <h3>Data Visualiser / Data Quality Explorer</h3>
+                    <h3>BETA Release</h3>
                 </div>
-                <div class="col-sm-4 pr-2 pl-1">
-                    <button id="clear" class="btn btn-secondary form-control ml-1">
-                        Clear
-                    </button>
+                <div class="col-sm-12" >
+                  This tool works best on larger screens<br>
+                  Please send any feedback to <a href="mailto:hello@openactive.io" style="color:#74cbf3;">hello@openactive.io</a>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-sm-4">
-            <h5>API calls made:</h5> <div id="loading-time" style="display: none;"><h5>Loading feed pages...</h5><p>Note: the initial query can take up to 30 seconds for larger feeds, but takes less than 1 second on average for subsequent queries.</p><p>You can change your filter and "Execute query" again while the feed pages load to filter the results from the pages loaded so far.</p></div> <h6 id="progress"></h6>
-            <div id="api"></div>
+    </div> <!-- Close id=mainheading -->
+
+    <!-- Controls and messages -->
+    <!-- Removed class "container-fluid" as didn't seem necessary, works well at all sizes without but keep an eye on -->
+    <div id="controls-messages" class="section">
+        <div class="flex-row">
+
+            <!-- Left column: Controls -->
+            <div id="controls" class="col-md-6 col-sm-8 left-right-auto">
+
+                <div class="flex-row">
+                    <div class="col-sm-5 top-auto">
+                        <label class="bottom">Data Provider (No. of opportunities):</label>
+                        <select id="provider" class="form-control bottom"></select>
+                    </div>
+                    <div class="col-sm-3 top-auto">
+                        <label class="bottom">Data Type:</label>
+                        <select id="endpoint" class="form-control bottom"></select>
+                    </div>
+                    <div class="col-sm-2 top-auto">
+                        <button id="execute" class="btn btn-execute form-control bottom" disabled="disabled">Go</button>
+                    </div>
+                    <div class="col-sm-2 top-auto">
+                        <button id="clear" class="btn btn-secondary form-control bottom">Clear</button>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 top-auto">
+                    <label class="bottom">URL:</label>
+                    <input id="user-url" class="form-control bottom" type="text">
+                </div>
+
+                <div id="filter-menus" class="flex-row" style="display: none">
+                    <div class="col-sm-4 top-auto">
+                        <label class="bottom">Filter by Organiser:</label>
+                        <div id="organizer-list-dropdown" class="bottom">
+                        </div>
+                    </div>
+                    <div class="col-sm-4 top-auto">
+                        <label class="bottom">Filter by Location:</label>
+                        <div id="location-list-dropdown" class="bottom">
+                        </div>
+                    </div>
+                    <div class="col-sm-4 top-auto">
+                        <label class="bottom">Filter by Activity:</label>
+                        <div id="activity-list-dropdown" class="bottom">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DISABLED DISPLAY START -->
+                <div class="flex-row top" style="display: none;">
+                    <div class="col-sm-8">
+                        <div class="flex-row">
+                            <label class="ml-1" for="Keywords">Keywords</label>
+                        </div>
+                        <div class="flex-row">
+                            <input id="Keywords" class="form-control ml-1" disabled="disabled">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="RegularScheduleRow" class="flex-row top" style="display: none;">
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1" for="Day">Day</label>
+                        </div>
+                        <div class="flex-row">
+                            <select id="Day" class="form-control mr-1">
+                                <option value=""></option>
+                                <option value="https://schema.org/Monday">Monday</option>
+                                <option value="https://schema.org/Tuesday">Tuesday</option>
+                                <option value="https://schema.org/Wednesday">Wednesday</option>
+                                <option value="https://schema.org/Thursday">Thursday</option>
+                                <option value="https://schema.org/Friday">Friday</option>
+                                <option value="https://schema.org/Saturday">Saturday</option>
+                                <option value="https://schema.org/Sunday">Sunday</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1" for="StartTime">Start time</label>
+                        </div>
+                        <div class="flex-row">
+                            <input id="StartTime" type="time" class="form-control ml-1 mr-1" disabled="disabled">
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1" for="EndTime">End time</label>
+                        </div>
+                        <div class="flex-row">
+                            <input id="EndTime" type="time" class="form-control ml-1 mr-1" disabled="disabled">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="CoverageRow" class="flex-row top" style="display: none;">
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1" for="Coverage">Coverage (postcode)</label>
+                        </div>
+                        <div class="flex-row">
+                            <input id="Coverage" class="form-control mr-1" disabled="disabled">
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1" for="Proximity">Proximity (km)</label>
+                        </div>
+                        <div class="flex-row">
+                            <input id="Proximity" type="number" class="form-control ml-1 mr-1" disabled="disabled">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-row top" style="display: none;">
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1" for="Gender">Gender:</label>
+                        </div>
+                        <div class="flex-row">
+                            <select id="Gender" class="form-control mr-1">
+                                <option value=""></option>
+                                <option value="https://openactive.io/NoRestriction">No Restriction</option>
+                                <option value="https://openactive.io/MaleOnly">Male Only</option>
+                                <option value="https://openactive.io/FemaleOnly">Female Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="flex-row">
+                            <label class="ml-1">Min/Max age:</label>
+                            <label class="sr-only" for="minAge">Min age</label>
+                            <label class="sr-only" for="maxAge">Max age</label>
+                        </div>
+                        <div class="flex-row">
+                            <div class="input-group">
+                                <input id="minAge" type="number" class="form-control ml-1" disabled="disabled">
+                                <input id="maxAge" type="number" class="form-control mr-1" disabled="disabled">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- DISABLED DISPLAY END -->
+
+            </div>
+
+            <!-- Right column: Messages -->
+            <div id="messages" class="col-md-6 col-sm-8 left-right-auto">
+                <div class="col-sm-12 top-auto">
+                    <div class="flex-row" style="justify-content: space-between;">
+                        <label class="bottom">Log:</label>
+                        <div id="progress-indicator" class="bottom" style="display: none;"></div>
+                    </div>
+                    <div id="log" class="bottom">
+                    </div>
+                    <div id="record-limit" class="bottom" style="display: none;">
+                        Note: only the first 25,000 items (approx.) from the API are being processed.
+                    </div>
+                    <div id="loading-time" class="bottom" style="display: none;">
+                        Note: the initial query can take up to 5-10 minutes to read and process the largest feeds.
+                    </div>
+                    <div id="loading-error" class="bottom" style="display: none;">
+                        <div class="bottom">API Request failed with message: <span id="loading-error-message"></span></div>
+                        <div id="retry-auto" class="bottom">Auto-retry (<span id="retryCountAuto"></span> of <span id="retryCountMax"></span>) in <span id="retryCountdown"></span> seconds ...</div>
+                        <div id="retry-manual" class="bottom"><span id="retryCount"></span> retries attempted. Click to retry again.</div>
+                        <button id="retry" class="btn btn-execute left-right-auto" style="display: block; width: 100px; margin-bottom: 5px;">Retry</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </div> <!-- Close id=controls-messages -->
+
+    <!-- Data quality metrics -->
+    <!-- Removed class "container-fluid" as didn't seem necessary, works well at all sizes without but keep an eye on -->
+    <div id="output" class="section" style="display: none;">
+
+        <div id="summaryPanel">
+
+            <div class="col-md-12 col-sm-8 left-right-auto">
+                <div id="grad" class="flex-row">
+                    <h2 style="margin: 0;">DISCOVERY</h2>
+                    <h4 id="dq-label" style="margin: 0; display:none;">Data Quality Metrics linked to Use Cases</h4>
+                    <h2 style="margin: 0;">BOOKING</h2>
+                </div>
+            </div>
+
+            <div class="col-md-12 col-sm-8 flex-row left-right-auto sparkboxes">
+                <div class="col-md-2">
+                    <div class="box box1">
+                        <div id="apexchart1"></div>
+                    </div>
+                    <div class="explainer" style="display:none;">
+                        <p>Using the official activity list helps developers create better user experiences,
+                           for example, by grouping activities to simplify search.</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="box box2">
+                        <div id="apexchart2"></div>
+                    </div>
+                    <div class="explainer" style="display:none;">
+                        <p>As well as activity ID and name, adding a description can engage participants and
+                           help them decide if the activity is right for them.</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="box box3">
+                        <div id="apexchart3"></div>
+                    </div>
+                    <div class="explainer" style="display:none;">
+                        <p>Developers use postcodes or coordinates to display activities on a map and to
+                           search by location.</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="box box4">
+                        <div id="apexchart4"></div>
+                    </div>
+                    <div class="explainer" style="display:none;">
+                        <p>Activity finders focus on upcoming events.</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="box box5">
+                        <div id="apexchart5a"></div>
+                        <div id="apexchart5b"></div>
+                    </div>
+                    <div class="explainer" style="display:none;">
+                        <p>Having a URL link directly to the booking page for a specific series or session
+                           significantly improves user experience.</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="box box6">
+                        <div id="apexchart6"></div>
+                    </div>
+                    <div class="explainer" style="display:none;">
+                        <p>This charts shows the start dates of scheduled sessions or slots where available.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="filter-switches" class="col-md-12 col-sm-8 flex-row left-right-auto" style="display: none;">
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-2">
+                    <div class='filter'>
+                        <p>Show<br />All</p>
+                        <label class="switch">
+                            <input id="DQ_filterActivities" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        <p>Show<br />Issues</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class='filter'>
+                        <p>Show<br />All</p>
+                        <label class="switch">
+                            <input id="DQ_filterGeos" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        <p>Show<br />Issues</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class='filter'>
+                        <p>Show<br />All</p>
+                        <label class="switch">
+                            <input id="DQ_filterDates" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        <p>Show<br />Issues</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class='filter'>
+                        <p>Show<br />All</p>
+                        <label class="switch">
+                            <input id="DQ_filterUrls" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        <p>Show<br />Issues</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                </div>
+            </div> <!-- Close id=filter-switches -->
+
+        </div> <!-- Close id=summaryPanel -->
+
+        <div id="tabs" class="col-md-12 col-sm-8 left-right-auto">
+            <ul class="nav nav-tabs">
+                <li class="nav-item"><a id="resultTab" class="nav-link active" href="#resultPanel" data-toggle="tab">
+                    Results</a></li>
+                <li class="nav-item"><a id="jsonTab" class="nav-link" href="#jsonPanel" data-toggle="tab">
+                    JSON</a></li>
+                <li class="nav-item"><a id="apiTab" class="nav-link" href="#apiPanel" data-toggle="tab">
+                    API calls</a></li>
+                <li class="nav-item"><a id="organizerTab" class="nav-link" href="#organizerPanel" data-toggle="tab">
+                    Organisers</a></li>
+                <li class="nav-item"><a id="locationTab" class="nav-link" href="#locationPanel" data-toggle="tab">
+                    Locations</a></li>
+                <li class="nav-item"><a id="mapTab" class="nav-link" href="#mapPanel" data-toggle="tab">
+                    Map</a></li>
+            </ul>
+            <div class="tab-content" style="min-height: 100vh;">
+                <div class="tab-pane active" id="resultPanel">
+                    <div id="results" class="col-sm-12">
+                    </div>
+                </div>
+                <div class="tab-pane" id="jsonPanel">
+                    <div id="json" class="json">
+                    </div>
+                </div>
+                <div class="tab-pane" id="apiPanel">
+                    <div id="api" class="col-sm-12">
+                    </div>
+                </div>
+                <div class="tab-pane" id="organizerPanel">
+                    <div id="organizer" class="col-sm-12">
+                    </div>
+                </div>
+                <div class="tab-pane" id="locationPanel">
+                    <div id="location" class="col-sm-12">
+                    </div>
+                </div>
+                <div class="tab-pane" id="mapPanel">
+                    <div id="map">
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Close id=tabs -->
+
+    </div> <!-- Close id=output -->
+
+    <div id="footer" class="section" style="min-height:2%;">
+        &nbsp;
     </div>
-</div>
 
-<div id='tabs' style="padding: 3%">
-    <ul class="nav nav-tabs">
-        <li class="nav-item"><a id="resultTab" class="nav-link active" href="#resultPanel" data-toggle="tab">
-            Results </a></li>
-        <li class="nav-item"><a id="graphTab" class="nav-link disabled" href="#graphPanel" data-toggle="tab">
-            Visualisation</a></li>
-        <li class="nav-item"><a id="validateTab" class="nav-link disabled" href="#validatePanel" data-toggle="tab">
-            Validate</a></li>
-        <li class="nav-item"><a id="richnessTab" class="nav-link disabled" href="#richnessPanel" data-toggle="tab">
-            Richness</a></li>
-    </ul>
-
-    <div class="tab-content">
-        <div class="tab-pane active" id="resultPanel">
-            <div id="results" class="col-sm-12" >
-
-            </div>
-        </div>
-        <div class="tab-pane" id="graphPanel">
-            <div id="graphLoading"></div>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm2-2">
-                        <label class="mr-1" for="format">Format</label>
-                        <select id="format" class="form-control mr-1 mb-2" style="width:auto">
-                          <option value="json">Json</option>
-                          <option value="image">GUI</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div id="graph" class="graph">
-
-                </div>
-            </div>
-        </div>
-        <div class="tab-pane" id="validatePanel">
-            <div id="validate" class="col-sm-12" style="padding-left: 3%">
-
-            </div>
-        </div>
-        <div class="tab-pane" id="richnessPanel">
-            <div id="richness" class="col-sm-12 col-md-10 col-lg-8 mt-2" style="padding-left: 1%">
-
-            </div>
-        </div>
+    <div id="scripts">
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/luxon@1.26.0/build/global/luxon.min.js"
+            integrity="sha256-4sbTzmCCW9LGrIh5OsN8V5Pfdad1F1MwhLAOyXKnsE0="
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@openactive/skos@1.4.3/dist/skos.min.js"></script>
+        <script src="https://neofusion.github.io/hierarchy-select/v2/dist/hierarchy-select.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <!-- Add e.g. '@3.35.0' to the end of the leaflet URL to use a specific version number -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+        <script src="apisearch.js"></script>
+        <script src="dq.js"></script>
     </div>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/luxon@1.26.0/build/global/luxon.min.js" integrity="sha256-4sbTzmCCW9LGrIh5OsN8V5Pfdad1F1MwhLAOyXKnsE0=" crossorigin="anonymous"></script>
-        
-<script src="https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@openactive/skos@1.4.3/dist/skos.min.js"></script>
-<script src="https://neofusion.github.io/hierarchy-select/v2/dist/hierarchy-select.min.js"></script>
-<script src="apisearch.js"></script>
 
 </body>
+
 </html>

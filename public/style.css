@@ -1,34 +1,296 @@
-#api {
-  height: 450px;
-  overflow-y: scroll;
-  position: relative;
-  bottom: 0;
+html * {
+  font-family: Montserrat, sans-serif;
 }
 
-.mainheading {
-  text-align: center;
+/* General layout */
+
+.section {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.flex-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.top {
+  margin-top: 10px;
+}
+
+.top-auto {
+  margin-top: auto;
+}
+
+.bottom {
+  margin-bottom: 10px;
+}
+
+.bottom-auto {
+  margin-bottom: auto;
+}
+
+.left-right {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.left-right-auto {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Main heading */
+
+#mainheading {
+  /* justify-content: space-evenly;
+  text-align: center; */
+  background-color: #253882;
+}
+
+#maintext {
+  color: white;
+}
+
+/* Messages */
+
+#log {
+  overflow-y: auto;
+  height: 250px;
+  border: 1px solid rgb(206, 212, 218);
+  border-radius: 4px;
+}
+
+.log-heading {
+  border-bottom: 1px solid rgb(206, 212, 218);
+  font-weight: bold;
+}
+
+.log-dot {
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  margin-bottom: 1px;
+  margin-right: 5px;
+  background-color: rgb(206, 212, 218);
+}
+
+.log-dot-busy {
+  background-color: #931e80;
+}
+
+.log-dot-done {
+  background-color: #009ee3;
+}
+
+.log-dot-warn {
+  background-color: #f6a635;
+}
+
+.log-dot-error {
+  background-color: #e63b2e;
+}
+
+#record-limit,
+#loading-time,
+#loading-error {
+  padding: 10px;
+  border: 1px solid #f6a635;
+  border-radius: 4px;
+  background-color: #f7cf4c;
+}
+
+/* Controls */
+
+.btn-execute {
+  background-color: #931e80 !important;
+  border-color: #931e80 !important;
+  color: white !important;
+}
+
+.btn-execute:focus {
+  box-shadow: 0 0 0 3px #c794c780 !important;
+}
+
+/* Other to sort ... */
+
+div.col-md-2, div.col-md-6 {
+  margin-right: 0px;
+  margin-left: 0px;
+  padding-right: 0px;
+  padding-left: 0px;
+}
+
+.dropdown-toggle.selected {
+  /* background-color: #2196F3; */
+  background-color: #009ee3;
 }
 
 .rowhover:hover {
   background-color: lightgrey;
 }
 
-.graph {
-  alignment: center;
-  width: 85vh;
-  height: 85vw;
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.json {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: left;
+}
+
+.json-tab-subpanel {
+  width: 50%;
+}
+
+.json-tab-heading {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.json-tab-button {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+
+.api {
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin: 2px;
 }
 
 .noPadding {
   padding: 0 !important;
   margin: 0 !important;
 }
+
 .w-95 {
   width: 95% !important;
 }
 
-#loading-time {
-  background-color: yellow;
-  margin: 5px;
+#grad {
+  background-image: linear-gradient(to right, rgba(113,203,242,0.8), rgba(226,20,131,0.8));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  color: #fff;
   padding: 10px;
+  border-radius: 8px 8px 0px 0px;
 }
+
+#summaryPanel {
+  min-height: 480px !important;
+  position: relative;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.sparkboxes .box {
+  /* padding: 3px 0 0 0; */
+  position: relative;
+  height: 300px !important;
+}
+
+#apexchart5a, #apexchart5b {
+  position: relative;
+  height: 150px !important;
+}
+
+#spark1, #spark2, #spark3, #spark4, #spark5, #spark6, .explainer {
+  position: relative;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.filter {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+.filter p {
+  color: gray;
+  padding-right: 10px;
+  padding-left: 10px;
+  margin-top: 8px;
+  font-size: smaller;
+}
+
+/* overrides */
+.sparkboxes #apexcharts-subtitle-text { fill: #8799a2 !important; }
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  /* background-color: #2196F3; */
+  background-color: #009ee3;
+}
+
+input:focus + .slider {
+  /* box-shadow: 0 0 1px #2196F3; */
+  box-shadow: 0 0 1px #009ee3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+#map { height: 1000px; }
