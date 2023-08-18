@@ -8,6 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Howard Askew",
+  "contributors" : [
+    "Howard Askew (https://github.com/howaskew)",
+    "Darren Temple (https://github.com/reikyo)",
+    "Nick Evans (https://github.com/nickevansuk)"
+  ],
   "license": "MIT",
   "dependencies": {
     "apexcharts": "^3.37.3",

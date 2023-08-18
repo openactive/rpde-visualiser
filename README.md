@@ -2,7 +2,7 @@
 
 This tools allows users to explore OpenActive data feeds. It is intended for:
 - data publishers, to identify data quality issues
-- general users, to explore OpenActive data 
+- general users, to explore OpenActive data
 
 Please visit https://visualiser.openactive.io/ to see it in action.
 
@@ -16,7 +16,7 @@ To explore data quality issues:
 1. Select a data feed provider
 2. Select a data feed type
 3. Press Go
-4. Progress is shown in the panel in the top right of the display. 
+4. Progress is shown in the panel in the top right of the display.
 5. When processing is complete, the data quality metrics and a sample of records are displayed
 6. You can filter by organiser, location or activity or highlight records that have not met the DQ measure using the sliders
 6. You can view records in various ways: as a table, as raw json from the data feeds, as a list, on a map
