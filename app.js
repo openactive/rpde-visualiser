@@ -605,7 +605,11 @@ app.get('/sum', async (req, res) => {
       const sumQuery = `
         SELECT SUM(numParent) AS sumParent,
         SUM(numChild) AS sumChild,
-        SUM(DQ_validActivity) AS sumDQ_validActivity
+        SUM(DQ_validActivity) AS sumDQ_validActivity,
+        SUM(DQ_validGeo) AS sumDQ_validGeo,
+        SUM(DQ_validDate) AS sumDQ_validDate,
+        SUM(DQ_validParentUrl) AS sumDQ_validParentUrl,
+        SUM(DQ_validChildUrl) AS sumDQ_validChildUrl
         FROM openactivedq;
       `;
       const result = await client.query(sumQuery);
@@ -618,8 +622,12 @@ app.get('/sum', async (req, res) => {
       const sum1 = Number(result.rows[0].sumparent);
       const sum2 = Number(result.rows[0].sumchild);
       const sum3 = Number(result.rows[0].sumdq_validactivity);
-
-      res.json({ sum1, sum2, sum3 });
+      const sum4 = Number(result.rows[0].sumdq_validgeo);
+      const sum5 = Number(result.rows[0].sumdq_validdate);
+      const sum6 = Number(result.rows[0].sumdq_validparenturl);
+      const sum7 = Number(result.rows[0].sumdq_validchildurl);
+ 
+      res.json({ sum1, sum2, sum3, sum4, sum5, sum6, sum7 });
     }
     catch (error) {
       console.error('Error executing the sum query:', error);
