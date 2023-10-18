@@ -191,7 +191,7 @@ axios.defaults.timeout = 40000; // In ms. Default 0. Increase to wait for longer
 // and the last element will go to the dev console. If a string is given instead of an array, then
 // both messages are the same. In all cases, messages are always printed to the user console but only
 // printed to the dev console if echoInDevConsole is true.
-function setLogMessage(messageIn, messageType, echoInDevConsole=false) {
+function setLogMessage(messageIn, messageType, echoInDevConsole = false) {
 
   // This global variable can be used to track and modify a particular user console message after it
   // has been printed, if need be. It is returned from this function for that purpose, primarily intended
@@ -215,16 +215,16 @@ function setLogMessage(messageIn, messageType, echoInDevConsole=false) {
   if (echoInDevConsole) {
     switch (messageType) {
       case ('heading'):
-        console.warn(messageIn[messageIn.length-1]);
+        console.warn(messageIn[messageIn.length - 1]);
         break;
       case ('warn'):
-        console.warn(messageIn[messageIn.length-1]);
+        console.warn(messageIn[messageIn.length - 1]);
         break;
       case ('error'):
-        console.warn(messageIn[messageIn.length-1]);
+        console.warn(messageIn[messageIn.length - 1]);
         break;
       default:
-        console.log(messageIn[messageIn.length-1]);
+        console.log(messageIn[messageIn.length - 1]);
         break;
     }
   }
@@ -571,7 +571,7 @@ function showSample() {
 
       const sampleUrls = new Set();
       Object.keys(storeSample.items).forEach(id => {
-        const sampleUrlsCurrent = id.split('http').slice(1,3).map(url => 'http' + url.trim());
+        const sampleUrlsCurrent = id.split('http').slice(1, 3).map(url => 'http' + url.trim());
         sampleUrlsCurrent.forEach(url => sampleUrls.add(url));
       });
 
@@ -1240,6 +1240,7 @@ function setLocations(locations) {
 // -------------------------------------------------------------------------------------------------
 
 function setActivities(activities) {
+
   activityListRefresh++;
   let activityListSelected = $('#activity-list-selected').val() || '';
 
@@ -1261,8 +1262,17 @@ function setActivities(activities) {
     </div>`);
   $('#activity-list-selected').val(activityListSelected);
 
-  // Render the activity list in a format HierarchySelect will understand:
-  $(`#activity-list-dropdown-${activityListRefresh} .hs-menu-inner`).append(renderTree(activities.getTopConcepts(), 1, []));
+  if (JSON.stringify(activities).includes('activity-list')) {
+    activities = scheme_1.generateSubset(Object.keys(activities));
+    // Render the activity list in a format HierarchySelect will understand:
+    $(`#activity-list-dropdown-${activityListRefresh} .hs-menu-inner`).append(renderTree(activities.getTopConcepts(), 1, []));
+  }
+  else {
+    //scheme 2 (facility list) does not have top concepts. TO DO: group all under 'Facility Type'?
+    activities = scheme_2.generateSubset(Object.keys(activities));
+    // Render the activity list in a format HierarchySelect will understand:
+    $(`#activity-list-dropdown-${activityListRefresh} .hs-menu-inner`).append(renderTree(activities.getAllConcepts(), 1, []));
+  }
 
   $(`#activity-list-dropdown-${activityListRefresh}`).hierarchySelect({
     width: '100%',
@@ -1450,7 +1460,7 @@ function addResultsPanel() {
 
 // -------------------------------------------------------------------------------------------------
 
-function addApiPanel(text, storeIngressOrder, isHeading=false) {
+function addApiPanel(text, storeIngressOrder, isHeading = false) {
   let panel = $('#api');
   if (isHeading) {
     panel.append(
@@ -2000,7 +2010,7 @@ function setFeeds() {
 
 // -------------------------------------------------------------------------------------------------
 
-function setProviders(dqTriggered=false) {
+function setProviders(dqTriggered = false) {
   // console.warn(`${luxon.DateTime.now()} setProviders: start`);
   $.getJSON('/api/get-dqsummaries', function (dqsummaries) {
     $('#provider').empty();
@@ -2011,8 +2021,8 @@ function setProviders(dqTriggered=false) {
         const feedUrl = dqsummary.id.split(' ')[0];
         if (
           feedUrl in feeds && // The database may contain publishers from previous runs that aren't in the current /feeds, so only use those that are
-          ( publisherName === 'All OpenActive Feeds' ||
-            publisherName === feeds[feedUrl].publisherName )
+          (publisherName === 'All OpenActive Feeds' ||
+            publisherName === feeds[feedUrl].publisherName)
         ) {
           publisherSumParentChild += dqsummary.numparent + dqsummary.numchild;
         }
