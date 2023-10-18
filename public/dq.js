@@ -536,7 +536,7 @@ function setStoreDataQualityItemFlags() {
 
     const activities = resolveProperty(item, 'activity');
 
-    storeDataQuality.dqFlags[item.id].DQ_validActivity =
+    validActivity =
       Array.isArray(activities) &&
       activities
         .map(activity => activity['id'] || activity['@id'])
@@ -544,6 +544,17 @@ function setStoreDataQualityItemFlags() {
         .map(activityId => matchToActivityList(activityId))
         .filter(prefLabel => prefLabel)
         .length > 0;
+
+    const facilities = resolveProperty(item, 'facilityType');
+    validFacility = Array.isArray(facilities) &&
+      facilities
+        .map(activity => activity['id'] || activity['@id'])
+        .filter(activityId => activityId)
+        .map(activityId => matchToFacilityList(activityId))
+        .filter(prefLabel => prefLabel)
+        .length > 0;
+
+    storeDataQuality.dqFlags[item.id].DQ_validActivity = validActivity || validFacility;
 
     if (storeDataQuality.dqFlags[item.id].DQ_validActivity) {
       storeDataQuality.dqSummary.DQ_validActivity++;
@@ -787,7 +798,7 @@ function postDataQuality() {
       !filters.relevantActivitySet
         ? true
         : storeDataQuality.dqFlags[item.id].DQ_validActivity &&
-        (resolveProperty(item, 'activity') || [])
+        (resolveProperty(item, 'activity') || resolveProperty(item, 'facilityType') || [])
           .map(activity => activity['id'] || activity['@id'])
           .filter(activityId => activityId)
           .filter(activityId => filters.relevantActivitySet.has(activityId))
@@ -923,14 +934,14 @@ function postDataQuality() {
       // -------------------------------------------------------------------------------------------------
 
       if (storeDataQuality.dqFlags[item.id].DQ_validActivity) {
-        const activities = resolveProperty(item, 'activity');
+        const activities = (resolveProperty(item, 'activity') || resolveProperty(item, 'facilityType'));
         let itemUniqueActivityIds = new Set();
 
         activities
           .map(activity => activity['id'] || activity['@id'])
           .filter(activityId => activityId)
           .forEach(activityId => {
-            let prefLabel = matchToActivityList(activityId);
+            let prefLabel = (matchToActivityList(activityId) || matchToFacilityList(activityId));
             if (prefLabel) {
               itemUniqueActivityIds.add(activityId);
               if (!storeDataQuality.filteredItemsUniqueActivityIds.hasOwnProperty(activityId)) {
@@ -1100,7 +1111,7 @@ function postDataQuality() {
   console.log(`Number of unique locations: ${Object.keys(storeDataQuality.filteredItemsUniqueLocations).length}`);
   // console.dir(`storeDataQuality.filteredItemsUniqueLocations: ${Object.keys(storeDataQuality.filteredItemsUniqueLocations)}`);
 
-  setActivities(scheme_1.generateSubset(Object.keys(storeDataQuality.filteredItemsUniqueActivityIds)));
+  setActivities(storeDataQuality.filteredItemsUniqueActivityIds);
   console.log(`Number of unique activities: ${Object.keys(storeDataQuality.filteredItemsUniqueActivityIds).length}`);
   // console.dir(`storeDataQuality.filteredItemsUniqueActivityIds: ${Object.keys(storeDataQuality.filteredItemsUniqueActivityIds)}`);
 
@@ -1301,9 +1312,9 @@ function postDataQuality() {
 
     if (Object.keys(storeDataQuality.filteredItemsUniqueActivityIds).length < 1) {
       x_axis_title = {
-        text: "No Matching Activity IDs",
+        text: ["No Matching Activity","or Facility Type IDs"],
         offsetX: -5,
-        offsetY: -150,
+        offsetY: -110,
         style: {
           fontSize: '20px',
           fontWeight: 900,
@@ -1312,7 +1323,7 @@ function postDataQuality() {
     }
     else {
       x_axis_title = {
-        text: "Top Activities",
+        text: "Top Activities / Facilities",
         offsetX: -20,
         offsetY: -8,
         style: {
@@ -1359,7 +1370,7 @@ function postDataQuality() {
       dataLabels: {
         enabled: false,
       },
-      labels: Array.from(topActivities.keys()).map(activityId => matchToActivityList(activityId)),
+      labels: Array.from(topActivities.keys()).map(activityId => (matchToActivityList(activityId) || matchToFacilityList(activityId))),
       colors: ['#71CBF2'],
       title: {
         text: spark1Count.toLocaleString(),
@@ -1499,6 +1510,14 @@ function postDataQuality() {
 
     if (filters.DQ_filterActivities !== true) {
 
+      let activityLabel = '';
+      if (JSON.stringify(storeDataQuality.filteredItemsUniqueActivityIds).includes('activity-list')) {
+        activityLabel = 'Have activity IDs';
+      }
+      else {
+        activityLabel = 'Have facility IDs';
+      }
+
       options_percentItemsWithActivity = {
         chart: {
           height: 300,
@@ -1528,7 +1547,7 @@ function postDataQuality() {
         //  }]
         //},
         series: [rounded3_a, rounded3_b, rounded3_c],
-        labels: ['Have activity IDs', 'Have names', 'Have descriptions'],
+        labels: [activityLabel, 'Have names', 'Have descriptions'],
         plotOptions: {
           radialBar: {
             hollow: {
@@ -1551,7 +1570,7 @@ function postDataQuality() {
               },
               total: {
                 show: true,
-                label: ['Have activity IDs'],
+                label: activityLabel,
                 color: "#888",
                 fontSize: "18px",
                 formatter: function (w) {
