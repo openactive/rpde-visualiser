@@ -1614,6 +1614,7 @@ function postDataQuality() {
   }
 
   if (!showingSample | showAll) {
+    $('#dq-label').fadeIn();
     chart2 = new ApexCharts(document.querySelector("#apexchart2"), options_percentItemsWithActivity);
     chartTimer += 200;
     sleep(chartTimer).then(() => { chart2.render().then(() => chart2rendered = true); });

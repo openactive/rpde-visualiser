@@ -296,7 +296,6 @@ function loadingComplete() {
   clearTimeout(loadingTimeout);
   $('#loading-time').hide();
   $('#resultTab').text('Live Data');
-//  $('#dq-label').fadeIn();
   $('.explainer').fadeIn();
 
   let funcs = [
@@ -560,7 +559,7 @@ function showSample() {
   getSummary();
 
   $('#resultTab').text('Sample Data');
-  //$('#dq-label').hide();
+  $('#dq-label').hide();
   $('#filter-switches').fadeOut();
   $('.explainer').fadeOut();
 
