@@ -1180,7 +1180,7 @@ function postDataQuality() {
   let spark6SeriesName = '';
 
   if (showingSample) {
-    console.log(summary);
+
     percent3_a = (summary.sum3 / summary.sum2) * 100 || 0;
     rounded3_a = percent3_a.toFixed(1);
     rounded3_b = 0;
@@ -1197,6 +1197,7 @@ function postDataQuality() {
 
     percent4_b = (summary.sum6 / summary.sum2) * 100 || 0;
     rounded4_b = percent4_b.toFixed(1);
+
 
     spark1Count = summary.sum1;
     spark6Count = summary.sum2;
@@ -1308,6 +1309,8 @@ function postDataQuality() {
 
   $('#clear').prop('disabled', true);
   $('#output').fadeIn('slow');
+
+  let chartTimer = 0;
 
   // -------------------------------------------------------------------------------------------------
 
@@ -1610,9 +1613,11 @@ function postDataQuality() {
     options_percentItemsWithActivity = filter_chart;
   }
 
-  chart2 = new ApexCharts(document.querySelector("#apexchart2"), options_percentItemsWithActivity);
-  sleep(200).then(() => { chart2.render().then(() => chart2rendered = true); });
-
+  if (!showingSample | showAll) {
+    chart2 = new ApexCharts(document.querySelector("#apexchart2"), options_percentItemsWithActivity);
+    chartTimer += 200;
+    sleep(chartTimer).then(() => { chart2.render().then(() => chart2rendered = true); });
+  }
   // -------------------------------------------------------------------------------------------------
 
   let options_percentItemsWithGeo = {};
@@ -1657,10 +1662,11 @@ function postDataQuality() {
   else {
     options_percentItemsWithGeo = filter_chart;
   }
-
-  chart3 = new ApexCharts(document.querySelector("#apexchart3"), options_percentItemsWithGeo);
-  sleep(400).then(() => { chart3.render().then(() => chart3rendered = true); });
-
+  if (!showingSample | showAll) {
+    chart3 = new ApexCharts(document.querySelector("#apexchart3"), options_percentItemsWithGeo);
+    chartTimer += 200;
+    sleep(chartTimer).then(() => { chart3.render().then(() => chart3rendered = true); });
+  }
   // -------------------------------------------------------------------------------------------------
 
   let options_percentItemsNowToFuture = {};
@@ -1705,10 +1711,11 @@ function postDataQuality() {
   else {
     options_percentItemsNowToFuture = filter_chart;
   }
-
-  chart4 = new ApexCharts(document.querySelector("#apexchart4"), options_percentItemsNowToFuture);
-  sleep(600).then(() => { chart4.render().then(() => chart4rendered = true); });
-
+  if (!showingSample | showAll) {
+    chart4 = new ApexCharts(document.querySelector("#apexchart4"), options_percentItemsNowToFuture);
+    chartTimer += 200;
+    sleep(chartTimer).then(() => { chart4.render().then(() => chart4rendered = true); });
+  }
   // -------------------------------------------------------------------------------------------------
 
   var optionsSessionUrl = {
@@ -1801,14 +1808,15 @@ function postDataQuality() {
   else {
     options_percentItemsWithUrl = filter_chart;
   }
-
-  chart5a = new ApexCharts(document.querySelector("#apexchart5a"), optionsSessionUrl);
-  chart5b = new ApexCharts(document.querySelector("#apexchart5b"), options_percentItemsWithUrl);
-  sleep(800).then(() => {
-    chart5a.render().then(() => chart5arendered = true);
-    chart5b.render().then(() => chart5brendered = true);
-  });
-
+  if (!showingSample | showAll) {
+    chart5a = new ApexCharts(document.querySelector("#apexchart5a"), optionsSessionUrl);
+    chart5b = new ApexCharts(document.querySelector("#apexchart5b"), options_percentItemsWithUrl);
+    chartTimer += 200;
+    sleep(chartTimer).then(() => {
+      chart5a.render().then(() => chart5arendered = true);
+      chart5b.render().then(() => chart5brendered = true);
+    });
+  }
   // -------------------------------------------------------------------------------------------------
 
   let annotation_text = {};
@@ -1943,10 +1951,12 @@ function postDataQuality() {
   }
 
   chart6 = new ApexCharts(document.querySelector("#apexchart6"), spark6);
-  sleep(1200).then(() => { chart6.render().then(() => chart6rendered = true); });
-
-  sleep(1400).then(() => { $('#tabs').fadeIn('slow'); });
-  sleep(1600).then(() => {
+  chartTimer += 200;
+  sleep(chartTimer).then(() => { chart6.render().then(() => chart6rendered = true); });
+  chartTimer += 200;
+  sleep(chartTimer).then(() => { $('#tabs').fadeIn('slow'); });
+  chartTimer += 200;
+  sleep(chartTimer).then(() => {
     if (storeDataQuality.numFilteredItems !== 0) {
       $('#filter-menus').fadeIn('slow');
       if (!showingSample) {
@@ -1955,7 +1965,8 @@ function postDataQuality() {
     }
     enableFilters();
   });
-  sleep(1800).then(() => {
+  chartTimer += 200;
+  sleep(chartTimer).then(() => {
     $('#execute').prop('disabled', endpoint === null); // Ensure the execute button is disabled if we are showing sample data, as no valid endpoint to run
     $('#clear').prop('disabled', false); // Allow the clear button to be shown even if we are showing sample data, for clearing filters
     $('#progress-indicator').hide();

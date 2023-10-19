@@ -18,6 +18,7 @@ let showingSample;
 
 let urlTriggered; // Don't add to clearGlobals(), only relevant for initial page load via setFeeds()
 let executeTriggered; // Don't add to clearGlobals(), only relevant for initial page load via setFeeds()
+let showAll; // Don't add to clearGlobals(), only relevant for initial page load via setFeeds()
 
 let filters;
 let coverage;
@@ -1871,7 +1872,8 @@ function getSummary() {
 
 // -------------------------------------------------------------------------------------------------
 
-function setPage() {
+function setPage() { // url parameters not considered here
+
   // console.warn(`${luxon.DateTime.now()} setPage: start`);
 
   $("#provider").on("change", function () {
@@ -1992,6 +1994,7 @@ function setFeeds() {
     .done(function () {
       // console.warn(`${luxon.DateTime.now()} setFeeds: end`);
       publisherNames = [...new Set(Object.values(feeds).map(feed => feed.publisherName))];
+      showAll = getUrlParameter('showall') === 'true';
       urlTriggered = (getUrlParameter('endpoint') !== '') && (getUrlParameter('endpoint') in feeds);
       executeTriggered = getUrlParameter('execute') === 'true';
       setProviders();
