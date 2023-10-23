@@ -1348,28 +1348,27 @@ function postDataQuality() {
     }
   }
   else if (Object.keys(storeDataQuality.filteredItemsUniqueActivityIds).length < 1) {
-      x_axis_title = {
-        text: ["No Matching Activity","or Facility Type IDs"],
-        offsetX: -5,
-        offsetY: -110,
-        style: {
-          fontSize: '20px',
-          fontWeight: 900,
-        },
-      }
+    x_axis_title = {
+      text: ["No Matching Activity", "or Facility Type IDs"],
+      offsetX: -5,
+      offsetY: -110,
+      style: {
+        fontSize: '20px',
+        fontWeight: 900,
+      },
     }
-    else {
-      x_axis_title = {
-        text: "Top Activities / Facilities",
-        offsetX: -20,
-        offsetY: -8,
-        style: {
-          fontSize: '14px',
-          fontWeight: 900,
-        },
-      }
+  }
+  else {
+    x_axis_title = {
+      text: "Top Activities / Facilities",
+      offsetX: -20,
+      offsetY: -8,
+      style: {
+        fontSize: '14px',
+        fontWeight: 900,
+      },
+    }
 
-    }
   }
 
   if (showingSample) {
@@ -1456,63 +1455,64 @@ function postDataQuality() {
       },
       axisBorder: {
         show: false,
-      axisTicks: {
-        show: false,
-      }
-    },
-    yaxis: {
-      show: show_y_axis,
-      showForNullSeries: false,
-      labels: {
-        show: true,
-        align: 'left',
-        minWidth: 0,
-        maxWidth: 90,
-        offsetX: 12,
-        offsetY: 6,
-        formatter: function (value) {
-          let label = value.toString().trim();
-          let words = label.split(" ");
-          let lines = [];
-          let line = "";
-          for (let i = 0; i < words.length; i++) {
-            let testLine = line + words[i];
-            if (testLine.length > 10) { // Replace 10 with your desired line length
-              lines.push(line.trim());
-              line = words[i] + " ";
-            } else {
-              line = testLine + " ";
+        axisTicks: {
+          show: false,
+        }
+      },
+      yaxis: {
+        show: show_y_axis,
+        showForNullSeries: false,
+        labels: {
+          show: true,
+          align: 'left',
+          minWidth: 0,
+          maxWidth: 90,
+          offsetX: 12,
+          offsetY: 6,
+          formatter: function (value) {
+            let label = value.toString().trim();
+            let words = label.split(" ");
+            let lines = [];
+            let line = "";
+            for (let i = 0; i < words.length; i++) {
+              let testLine = line + words[i];
+              if (testLine.length > 10) { // Replace 10 with your desired line length
+                lines.push(line.trim());
+                line = words[i] + " ";
+              } else {
+                line = testLine + " ";
+              }
             }
+            lines.push(line.trim());
+            //console.log(lines);
+            return lines;
           }
-          lines.push(line.trim());
-          //console.log(lines);
-          return lines;
+        },
+        floating: false, //true takes y axis out of plot space
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false
         }
       },
-      floating: false, //true takes y axis out of plot space
-      axisBorder: {
-        show: false,
-      },
-      axisTicks: {
-        show: false
+      tooltip: {
+        marker: {
+          show: false
+        },
+        //custom: function({series, seriesIndex, dataPointIndex, w}) {
+        //  return '<div class="arrow_box">' +
+        //   '<span>' + series[seriesIndex][dataPointIndex] + '</span>' +
+        //    '</div>'
+        //},
+        y: {
+          formatter: function (val) {
+            return val.toLocaleString();
+          }
+        },
       }
-    },
-    tooltip: {
-      marker: {
-        show: false
-      },
-      //custom: function({series, seriesIndex, dataPointIndex, w}) {
-      //  return '<div class="arrow_box">' +
-      //   '<span>' + series[seriesIndex][dataPointIndex] + '</span>' +
-      //    '</div>'
-      //},
-      y: {
-        formatter: function (val) {
-          return val.toLocaleString();
-        }
-      },
-    },
 
+    },
   }
 
   chart1 = new ApexCharts(document.querySelector("#apexchart1"), spark1);
@@ -1555,80 +1555,78 @@ function postDataQuality() {
 
   if (filters.DQ_filterActivities !== true) {
 
-      let activityLabel = '';
-      if (JSON.stringify(storeDataQuality.filteredItemsUniqueActivityIds).includes('activity-list')) {
-        activityLabel = 'Have activity IDs';
-      }
-      else {
-        activityLabel = 'Have facility IDs';
-      }
+    let activityLabel = '';
+    if (JSON.stringify(storeDataQuality.filteredItemsUniqueActivityIds).includes('activity-list')) {
+      activityLabel = 'Have activity IDs';
+    }
+    else {
+      activityLabel = 'Have facility IDs';
+    }
 
-      options_percentItemsWithActivity = {
-        chart: {
-          height: 300,
-          type: 'radialBar',
-          events: {
-            click: function (event, chartContext, config) {
-              //if ([...event.target.classList].includes('#apexcharts-radialbarTrack-0')) {
-              //alert('Chart clicked');
-              console.log(event);
-              console.log(chartContext);
-              console.log(config);
-            }
+    options_percentItemsWithActivity = {
+      chart: {
+        height: 300,
+        type: 'radialBar',
+        events: {
+          click: function (event, chartContext, config) {
+            //if ([...event.target.classList].includes('#apexcharts-radialbarTrack-0')) {
+            //alert('Chart clicked');
+            console.log(event);
+            console.log(chartContext);
+            console.log(config);
           }
-        },
-        fill: {
-          colors: ['#A7ABDA'],
-        },
-        //fill: {
-        //  colors: [function({ value, seriesIndex, w }) {
-        //    if(value < 55) {
-        //        return '#7E36AF'
-        //    } else if (value >= 55 && value < 80) {
-        //        return '#164666'
-        //    } else {
-        //        return '#D9534F'
-        //    }
-        //  }]
-        //},
-        series: [rounded3_a, rounded3_b, rounded3_c],
-        labels: [activityLabel, 'Have names', 'Have descriptions'],
-        plotOptions: {
-          radialBar: {
-            hollow: {
-              margin: 15,
-              size: "65%"
+        }
+      },
+      fill: {
+        colors: ['#A7ABDA'],
+      },
+      //fill: {
+      //  colors: [function({ value, seriesIndex, w }) {
+      //    if(value < 55) {
+      //        return '#7E36AF'
+      //    } else if (value >= 55 && value < 80) {
+      //        return '#164666'
+      //    } else {
+      //        return '#D9534F'
+      //    }
+      //  }]
+      //},
+      series: [rounded3_a, rounded3_b, rounded3_c],
+      labels: [activityLabel, 'Have names', 'Have descriptions'],
+      plotOptions: {
+        radialBar: {
+          hollow: {
+            margin: 15,
+            size: "65%"
+          },
+          total: {
+            show: true,
+            name: {
+              offsetY: 25,
+              show: true,
+              color: "#888",
+              fontSize: "18px"
+            },
+            value: {
+              offsetY: -30,
+              color: "#111",
+              fontSize: "30px",
+              show: true
             },
             total: {
               show: true,
-              name: {
-                offsetY: 25,
-                show: true,
-                color: "#888",
-                fontSize: "18px"
-              },
-              value: {
-                offsetY: -30,
-                color: "#111",
-                fontSize: "30px",
-                show: true
-              },
-              total: {
-                show: true,
-                label: activityLabel,
-                color: "#888",
-                fontSize: "18px",
-                formatter: function (w) {
-                  // By default this function returns the average of all series. The below is just an example to show the use of custom formatter function
-                  return Math.max(rounded3_a).toFixed(1) + "%";
-                }
-              },
-            }
+              label: activityLabel,
+              color: "#888",
+              fontSize: "18px",
+              formatter: function (w) {
+                // By default this function returns the average of all series. The below is just an example to show the use of custom formatter function
+                return Math.max(rounded3_a).toFixed(1) + "%";
+              }
+            },
           }
         }
       }
     }
-
   }
   else {
     options_percentItemsWithActivity = filter_chart;
