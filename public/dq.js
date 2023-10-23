@@ -1973,6 +1973,8 @@ function postDataQuality() {
     $('#progress-indicator').hide();
     setProviders(true);
     inProgress = false;
+    // Reset showAll - only show on initial load, not after filter changes
+    showAll = false;
   });
 
 }
