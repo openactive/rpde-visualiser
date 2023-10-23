@@ -1513,6 +1513,58 @@ function postDataQuality() {
       }
 
     },
+    yaxis: {
+      show: show_y_axis,
+      showForNullSeries: false,
+      labels: {
+        show: true,
+        align: 'left',
+        minWidth: 0,
+        maxWidth: 90,
+        offsetX: 12,
+        offsetY: 6,
+        formatter: function (value) {
+          let label = value.toString().trim();
+          let words = label.split(" ");
+          let lines = [];
+          let line = "";
+          for (let i = 0; i < words.length; i++) {
+            let testLine = line + words[i];
+            if (testLine.length > 10) { // Replace 10 with your desired line length
+              lines.push(line.trim());
+              line = words[i] + " ";
+            } else {
+              line = testLine + " ";
+            }
+          }
+          lines.push(line.trim());
+          //console.log(lines);
+          return lines;
+        }
+      },
+      floating: false, //true takes y axis out of plot space
+      axisBorder: {
+        show: false,
+      },
+      axisTicks: {
+        show: false
+      }
+    },
+    tooltip: {
+      marker: {
+        show: false
+      },
+      //custom: function({series, seriesIndex, dataPointIndex, w}) {
+      //  return '<div class="arrow_box">' +
+      //   '<span>' + series[seriesIndex][dataPointIndex] + '</span>' +
+      //    '</div>'
+      //},
+      y: {
+        formatter: function (val) {
+          return val.toLocaleString();
+        }
+      },
+    },
   }
 
   chart1 = new ApexCharts(document.querySelector("#apexchart1"), spark1);
@@ -1599,7 +1651,7 @@ function postDataQuality() {
             margin: 15,
             size: "65%"
           },
-          total: {
+          dataLabels: {
             show: true,
             name: {
               offsetY: 25,
