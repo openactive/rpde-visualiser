@@ -536,7 +536,7 @@ function setStoreDataQualityItemFlags() {
 
     const activities = resolveProperty(item, 'activity');
 
-    storeDataQuality.dqFlags[item.id].DQ_validActivity =
+    validActivity =
       Array.isArray(activities) &&
       activities
         .map(activity => activity['id'] || activity['@id'])
@@ -544,6 +544,17 @@ function setStoreDataQualityItemFlags() {
         .map(activityId => matchToActivityList(activityId))
         .filter(prefLabel => prefLabel)
         .length > 0;
+
+    const facilities = resolveProperty(item, 'facilityType');
+    validFacility = Array.isArray(facilities) &&
+      facilities
+        .map(activity => activity['id'] || activity['@id'])
+        .filter(activityId => activityId)
+        .map(activityId => matchToFacilityList(activityId))
+        .filter(prefLabel => prefLabel)
+        .length > 0;
+
+    storeDataQuality.dqFlags[item.id].DQ_validActivity = validActivity || validFacility;
 
     if (storeDataQuality.dqFlags[item.id].DQ_validActivity) {
       storeDataQuality.dqSummary.DQ_validActivity++;
@@ -787,7 +798,7 @@ function postDataQuality() {
       !filters.relevantActivitySet
         ? true
         : storeDataQuality.dqFlags[item.id].DQ_validActivity &&
-        (resolveProperty(item, 'activity') || [])
+        (resolveProperty(item, 'activity') || resolveProperty(item, 'facilityType') || [])
           .map(activity => activity['id'] || activity['@id'])
           .filter(activityId => activityId)
           .filter(activityId => filters.relevantActivitySet.has(activityId))
@@ -923,14 +934,14 @@ function postDataQuality() {
       // -------------------------------------------------------------------------------------------------
 
       if (storeDataQuality.dqFlags[item.id].DQ_validActivity) {
-        const activities = resolveProperty(item, 'activity');
+        const activities = (resolveProperty(item, 'activity') || resolveProperty(item, 'facilityType'));
         let itemUniqueActivityIds = new Set();
 
         activities
           .map(activity => activity['id'] || activity['@id'])
           .filter(activityId => activityId)
           .forEach(activityId => {
-            let prefLabel = matchToActivityList(activityId);
+            let prefLabel = (matchToActivityList(activityId) || matchToFacilityList(activityId));
             if (prefLabel) {
               itemUniqueActivityIds.add(activityId);
               if (!storeDataQuality.filteredItemsUniqueActivityIds.hasOwnProperty(activityId)) {
@@ -1100,7 +1111,7 @@ function postDataQuality() {
   console.log(`Number of unique locations: ${Object.keys(storeDataQuality.filteredItemsUniqueLocations).length}`);
   // console.dir(`storeDataQuality.filteredItemsUniqueLocations: ${Object.keys(storeDataQuality.filteredItemsUniqueLocations)}`);
 
-  setActivities(scheme_1.generateSubset(Object.keys(storeDataQuality.filteredItemsUniqueActivityIds)));
+  setActivities(storeDataQuality.filteredItemsUniqueActivityIds);
   console.log(`Number of unique activities: ${Object.keys(storeDataQuality.filteredItemsUniqueActivityIds).length}`);
   // console.dir(`storeDataQuality.filteredItemsUniqueActivityIds: ${Object.keys(storeDataQuality.filteredItemsUniqueActivityIds)}`);
 
@@ -1337,25 +1348,27 @@ function postDataQuality() {
     }
   }
   else if (Object.keys(storeDataQuality.filteredItemsUniqueActivityIds).length < 1) {
-    x_axis_title = {
-      text: "No Matching Activity IDs",
-      offsetX: -5,
-      offsetY: -150,
-      style: {
-        fontSize: '20px',
-        fontWeight: 900,
-      },
+      x_axis_title = {
+        text: ["No Matching Activity","or Facility Type IDs"],
+        offsetX: -5,
+        offsetY: -110,
+        style: {
+          fontSize: '20px',
+          fontWeight: 900,
+        },
+      }
     }
-  }
-  else {
-    x_axis_title = {
-      text: "Top Activities",
-      offsetX: -20,
-      offsetY: -8,
-      style: {
-        fontSize: '14px',
-        fontWeight: 900,
-      },
+    else {
+      x_axis_title = {
+        text: "Top Activities / Facilities",
+        offsetX: -20,
+        offsetY: -8,
+        style: {
+          fontSize: '14px',
+          fontWeight: 900,
+        },
+      }
+
     }
   }
 
@@ -1403,7 +1416,7 @@ function postDataQuality() {
     dataLabels: {
       enabled: false,
     },
-    labels: Array.from(topActivities.keys()).map(activityId => matchToActivityList(activityId)),
+    labels: Array.from(topActivities.keys()).map(activityId => (matchToActivityList(activityId) || matchToFacilityList(activityId))),
     colors: ['#71CBF2'],
     title: {
       text: spark1Count.toLocaleString(),
@@ -1443,7 +1456,6 @@ function postDataQuality() {
       },
       axisBorder: {
         show: false,
-      },
       axisTicks: {
         show: false,
       }
@@ -1543,66 +1555,75 @@ function postDataQuality() {
 
   if (filters.DQ_filterActivities !== true) {
 
-    options_percentItemsWithActivity = {
-      chart: {
-        height: 300,
-        type: 'radialBar',
-        events: {
-          click: function (event, chartContext, config) {
-            //if ([...event.target.classList].includes('#apexcharts-radialbarTrack-0')) {
-            //alert('Chart clicked');
-            console.log(event);
-            console.log(chartContext);
-            console.log(config);
+      let activityLabel = '';
+      if (JSON.stringify(storeDataQuality.filteredItemsUniqueActivityIds).includes('activity-list')) {
+        activityLabel = 'Have activity IDs';
+      }
+      else {
+        activityLabel = 'Have facility IDs';
+      }
+
+      options_percentItemsWithActivity = {
+        chart: {
+          height: 300,
+          type: 'radialBar',
+          events: {
+            click: function (event, chartContext, config) {
+              //if ([...event.target.classList].includes('#apexcharts-radialbarTrack-0')) {
+              //alert('Chart clicked');
+              console.log(event);
+              console.log(chartContext);
+              console.log(config);
+            }
           }
-        }
-      },
-      fill: {
-        colors: ['#A7ABDA'],
-      },
-      //fill: {
-      //  colors: [function({ value, seriesIndex, w }) {
-      //    if(value < 55) {
-      //        return '#7E36AF'
-      //    } else if (value >= 55 && value < 80) {
-      //        return '#164666'
-      //    } else {
-      //        return '#D9534F'
-      //    }
-      //  }]
-      //},
-      series: [rounded3_a, rounded3_b, rounded3_c],
-      labels: ['Have activity IDs', 'Have names', 'Have descriptions'],
-      plotOptions: {
-        radialBar: {
-          hollow: {
-            margin: 15,
-            size: "65%"
-          },
-          dataLabels: {
-            show: true,
-            name: {
-              offsetY: 25,
-              show: true,
-              color: "#888",
-              fontSize: "18px"
-            },
-            value: {
-              offsetY: -30,
-              color: "#111",
-              fontSize: "30px",
-              show: true
+        },
+        fill: {
+          colors: ['#A7ABDA'],
+        },
+        //fill: {
+        //  colors: [function({ value, seriesIndex, w }) {
+        //    if(value < 55) {
+        //        return '#7E36AF'
+        //    } else if (value >= 55 && value < 80) {
+        //        return '#164666'
+        //    } else {
+        //        return '#D9534F'
+        //    }
+        //  }]
+        //},
+        series: [rounded3_a, rounded3_b, rounded3_c],
+        labels: [activityLabel, 'Have names', 'Have descriptions'],
+        plotOptions: {
+          radialBar: {
+            hollow: {
+              margin: 15,
+              size: "65%"
             },
             total: {
               show: true,
-              label: ['Have activity IDs'],
-              color: "#888",
-              fontSize: "18px",
-              formatter: function (w) {
-                // By default this function returns the average of all series. The below is just an example to show the use of custom formatter function
-                return Math.max(rounded3_a).toFixed(1) + "%";
-              }
-            },
+              name: {
+                offsetY: 25,
+                show: true,
+                color: "#888",
+                fontSize: "18px"
+              },
+              value: {
+                offsetY: -30,
+                color: "#111",
+                fontSize: "30px",
+                show: true
+              },
+              total: {
+                show: true,
+                label: activityLabel,
+                color: "#888",
+                fontSize: "18px",
+                formatter: function (w) {
+                  // By default this function returns the average of all series. The below is just an example to show the use of custom formatter function
+                  return Math.max(rounded3_a).toFixed(1) + "%";
+                }
+              },
+            }
           }
         }
       }
