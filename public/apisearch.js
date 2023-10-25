@@ -128,6 +128,8 @@ let messageIdProgress;
 let progressIndicator = "<img src='images/ajax-loader.gif' alt='In progress'>";
 $('#progress-indicator').append(progressIndicator);
 
+let rowLimit = 25000;
+
 // -------------------------------------------------------------------------------------------------
 
 // Axios
@@ -293,6 +295,10 @@ function loadingStart() {
 // -------------------------------------------------------------------------------------------------
 
 function loadingComplete() {
+
+  // Reset rowLimit - must be set per run
+  rowLimit = 25000;
+
   clearTimeout(loadingTimeout);
   $('#loading-time').hide();
   $('#resultTab').text('Live Data');
@@ -731,7 +737,7 @@ function setStoreItems(urlOriginal, store) {
         response.data.next.length > 0 &&
         response.data.next !== urlOriginal &&
         response.data.next !== url &&
-        store.numItems < 25000
+        store.numItems < rowLimit
       ) {
         store.penultimatePage = url;
         try {
@@ -744,7 +750,7 @@ function setStoreItems(urlOriginal, store) {
         }
       }
       else {
-        if (store.numItems === 25000) {
+        if (store.numItems === rowLimit) {
           $('#record-limit').fadeIn();
         }
 
@@ -2004,6 +2010,7 @@ function setFeeds() {
       // console.warn(`${luxon.DateTime.now()} setFeeds: end`);
       publisherNames = [...new Set(Object.values(feeds).map(feed => feed.publisherName))];
       showAll = getUrlParameter('showall') === 'true';
+      rowLimit = getUrlParameter('rowlimit') || rowLimit;
       urlTriggered = (getUrlParameter('endpoint') !== '') && (getUrlParameter('endpoint') in feeds);
       executeTriggered = getUrlParameter('execute') === 'true';
       setProviders();

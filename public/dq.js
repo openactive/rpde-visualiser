@@ -1020,7 +1020,7 @@ function postDataQuality() {
     } // If-statement selecting filtered items
   } // For-loop over all items
 
-  // console.log(storeDataQuality.items);
+  //console.log(storeDataQuality.items);
 
   // ----END-OF-FOR-LOOP------------------------------------------------------------------------------
 
