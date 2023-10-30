@@ -12,14 +12,13 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700&display=swap">
     <link rel="stylesheet" href="https://neofusion.github.io/hierarchy-select/v2/dist/hierarchy-select.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-        crossorigin="anonymous">
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="">
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 
     <title>OpenActive Data Quality Explorer</title>
-    <link rel="icon" type="image/png" href="https://www.openactive.io/wp-content/themes/open-active-1_3/images/favicon.png">
+    <link rel="icon" type="image/png"
+        href="https://www.openactive.io/wp-content/themes/open-active-1_3/images/favicon.png">
 </head>
 
 <body style="overflow-y: scroll">
@@ -31,13 +30,14 @@
                 <img src="images/OpenActive-Landscape-Logo-White.svg" class="col-sm-12" style="max-height:80px;"></img>
             </div>
             <div id="maintext" class="col-md-6 col-sm-8 top-auto bottom-auto left-right-auto">
-                <div class="col-sm-12 flex-row" style="justify-content: space-between";>
+                <div class="col-sm-12 flex-row" style="justify-content: space-between" ;>
                     <h3>Data Visualiser / Data Quality Explorer</h3>
                     <h3>BETA Release</h3>
                 </div>
-                <div class="col-sm-12" >
-                  This tool works best on larger screens<br>
-                  Please send any feedback to <a href="mailto:hello@openactive.io" style="color:#74cbf3;">hello@openactive.io</a>
+                <div class="col-sm-12">
+                    This tool works best on larger screens<br>
+                    Please send any feedback to <a href="mailto:hello@openactive.io"
+                        style="color:#74cbf3;">hello@openactive.io</a>
                 </div>
             </div>
         </div>
@@ -206,10 +206,14 @@
                         Note: the initial query can take up to 5-10 minutes to read and process the largest feeds.
                     </div>
                     <div id="loading-error" class="bottom" style="display: none;">
-                        <div class="bottom">API Request failed with message: <span id="loading-error-message"></span></div>
-                        <div id="retry-auto" class="bottom">Auto-retry (<span id="retryCountAuto"></span> of <span id="retryCountMax"></span>) in <span id="retryCountdown"></span> seconds ...</div>
-                        <div id="retry-manual" class="bottom"><span id="retryCount"></span> retries attempted. Click to retry again.</div>
-                        <button id="retry" class="btn btn-execute left-right-auto" style="display: block; width: 100px; margin-bottom: 5px;">Retry</button>
+                        <div class="bottom">API Request failed with message: <span id="loading-error-message"></span>
+                        </div>
+                        <div id="retry-auto" class="bottom">Auto-retry (<span id="retryCountAuto"></span> of <span
+                                id="retryCountMax"></span>) in <span id="retryCountdown"></span> seconds ...</div>
+                        <div id="retry-manual" class="bottom"><span id="retryCount"></span> retries attempted. Click to
+                            retry again.</div>
+                        <button id="retry" class="btn btn-execute left-right-auto"
+                            style="display: block; width: 100px; margin-bottom: 5px;">Retry</button>
                     </div>
                 </div>
             </div>
@@ -221,135 +225,159 @@
     <!-- Removed class "container-fluid" as didn't seem necessary, works well at all sizes without but keep an eye on -->
     <div id="output" class="section" style="display: none;">
 
-        <div id="summaryPanel">
+        <div id="summaryPanel" class="col-md-12 col-sm-8 left-right-auto">
+            <ul class="nav nav-tabs" style="display: none;">
+                <li class="nav-item"><a id="UC1tab" class="nav-link active" href="#UC1panel" data-toggle="tab">
+                        Use Case: Find and Book</a></li>
+                <li class="nav-item"><a id="UC2tab" class="nav-link" href="#UC2panel" data-toggle="tab">
+                        Use Case: In-depth Listings for Inclusive Search</a></li>
+            </ul>
 
-            <div class="col-md-12 col-sm-8 left-right-auto">
-                <div id="grad" class="flex-row">
-                    <h2 style="margin: 0;">DISCOVERY</h2>
-                    <h4 id="dq-label" style="margin: 0; display:none;">Data Quality Metrics linked to Use Cases</h4>
-                    <h2 style="margin: 0;">BOOKING</h2>
+            <div class="tab-content">
+                <div id="UC1panel" class="tab-pane active">
+                    <div class="col-md-12 col-sm-8 left-right-auto">
+                        <div id="grad" class="flex-row">
+                            <h2 style="margin: 0;">DISCOVERY</h2>
+                            <h4 id="dq-label" style="margin: 0; display:none;">Data Quality Metrics linked to Use Cases
+                            </h4>
+                            <h2 style="margin: 0;">BOOKING</h2>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 col-sm-8 flex-row left-right-auto sparkboxes">
+                        <div class="col-md-2">
+                            <div class="box box1">
+                                <div id="apexchart1"></div>
+                            </div>
+                            <div class="explainer" style="display:none;">
+                                <p>Using the official activity and facility type lists helps developers create better
+                                    user
+                                    experiences,
+                                    for example, by grouping activities to simplify search.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="box box2">
+                                <div id="apexchart2"></div>
+                            </div>
+                            <div class="explainer" style="display:none;">
+                                <p>As well as activity or facility type ID and name, adding a description can engage
+                                    participants and
+                                    help them decide if the activity is right for them.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="box box3">
+                                <div id="apexchart3"></div>
+                            </div>
+                            <div class="explainer" style="display:none;">
+                                <p>Developers use postcodes or coordinates to display activities on a map and to
+                                    search by location.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="box box4">
+                                <div id="apexchart4"></div>
+                            </div>
+                            <div class="explainer" style="display:none;">
+                                <p>Activity finders focus on upcoming events.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="box box5">
+                                <div id="apexchart5a"></div>
+                                <div id="apexchart5b"></div>
+                            </div>
+                            <div class="explainer" style="display:none;">
+                                <p>Having a URL link directly to the booking page for a specific series or session
+                                    significantly improves user experience.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="box box6">
+                                <div id="apexchart6"></div>
+                            </div>
+                            <div class="explainer" style="display:none;">
+                                <p>This charts shows the start dates of scheduled sessions or slots where available.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="filter-switches" class="col-md-12 col-sm-8 flex-row left-right-auto"
+                        style="display: none;">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="col-md-2">
+                            <div class='filter'>
+                                <p>Show<br />All</p>
+                                <label class="switch">
+                                    <input id="DQ_filterActivities" type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <p>Show<br />Issues</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class='filter'>
+                                <p>Show<br />All</p>
+                                <label class="switch">
+                                    <input id="DQ_filterGeos" type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <p>Show<br />Issues</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class='filter'>
+                                <p>Show<br />All</p>
+                                <label class="switch">
+                                    <input id="DQ_filterDates" type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <p>Show<br />Issues</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class='filter'>
+                                <p>Show<br />All</p>
+                                <label class="switch">
+                                    <input id="DQ_filterUrls" type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <p>Show<br />Issues</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                        </div>
+                    </div> <!-- Close id=filter-switches -->
+                </div>
+                <div id="UC2panel" class="tab-pane">
+                    <div class="col-md-12 col-sm-8 left-right-auto">
+                        <div id="grad2" class="flex-row">
+                            <h2 style="margin: 0;">IN-DEPTH LISTINGS</h2>
+                            <h4 id="dq-label" style="margin: 0;">Data Quality Metrics linked to Use Cases
+                            </h4>
+                            <h2 style="margin: 0;">INCLUSIVE SEARCH</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-md-12 col-sm-8 flex-row left-right-auto sparkboxes">
-                <div class="col-md-2">
-                    <div class="box box1">
-                        <div id="apexchart1"></div>
-                    </div>
-                    <div class="explainer" style="display:none;">
-                        <p>Using the official activity and facility type lists helps developers create better user experiences,
-                           for example, by grouping activities to simplify search.</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="box box2">
-                        <div id="apexchart2"></div>
-                    </div>
-                    <div class="explainer" style="display:none;">
-                        <p>As well as activity or facility type ID and name, adding a description can engage participants and
-                           help them decide if the activity is right for them.</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="box box3">
-                        <div id="apexchart3"></div>
-                    </div>
-                    <div class="explainer" style="display:none;">
-                        <p>Developers use postcodes or coordinates to display activities on a map and to
-                           search by location.</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="box box4">
-                        <div id="apexchart4"></div>
-                    </div>
-                    <div class="explainer" style="display:none;">
-                        <p>Activity finders focus on upcoming events.</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="box box5">
-                        <div id="apexchart5a"></div>
-                        <div id="apexchart5b"></div>
-                    </div>
-                    <div class="explainer" style="display:none;">
-                        <p>Having a URL link directly to the booking page for a specific series or session
-                           significantly improves user experience.</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="box box6">
-                        <div id="apexchart6"></div>
-                    </div>
-                    <div class="explainer" style="display:none;">
-                        <p>This charts shows the start dates of scheduled sessions or slots where available.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="filter-switches" class="col-md-12 col-sm-8 flex-row left-right-auto" style="display: none;">
-                <div class="col-md-2">
-                </div>
-                <div class="col-md-2">
-                    <div class='filter'>
-                        <p>Show<br />All</p>
-                        <label class="switch">
-                            <input id="DQ_filterActivities" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                        <p>Show<br />Issues</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class='filter'>
-                        <p>Show<br />All</p>
-                        <label class="switch">
-                            <input id="DQ_filterGeos" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                        <p>Show<br />Issues</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class='filter'>
-                        <p>Show<br />All</p>
-                        <label class="switch">
-                            <input id="DQ_filterDates" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                        <p>Show<br />Issues</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class='filter'>
-                        <p>Show<br />All</p>
-                        <label class="switch">
-                            <input id="DQ_filterUrls" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                        <p>Show<br />Issues</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                </div>
-            </div> <!-- Close id=filter-switches -->
-
         </div> <!-- Close id=summaryPanel -->
 
         <div id="tabs" class="col-md-12 col-sm-8 left-right-auto">
             <ul class="nav nav-tabs">
                 <li class="nav-item"><a id="resultTab" class="nav-link active" href="#resultPanel" data-toggle="tab">
-                    Results</a></li>
+                        Results</a></li>
                 <li class="nav-item"><a id="jsonTab" class="nav-link" href="#jsonPanel" data-toggle="tab">
-                    JSON</a></li>
+                        JSON</a></li>
                 <li class="nav-item"><a id="apiTab" class="nav-link" href="#apiPanel" data-toggle="tab">
-                    API calls</a></li>
+                        API calls</a></li>
                 <li class="nav-item"><a id="organizerTab" class="nav-link" href="#organizerPanel" data-toggle="tab">
-                    Organisers</a></li>
+                        Organisers</a></li>
                 <li class="nav-item"><a id="locationTab" class="nav-link" href="#locationPanel" data-toggle="tab">
-                    Locations</a></li>
+                        Locations</a></li>
                 <li class="nav-item"><a id="mapTab" class="nav-link" href="#mapPanel" data-toggle="tab">
-                    Map</a></li>
+                        Map</a></li>
             </ul>
             <div class="tab-content" style="min-height: 100vh;">
                 <div class="tab-pane active" id="resultPanel">
@@ -386,8 +414,7 @@
     </div>
 
     <div id="scripts">
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"
-            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
             integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
@@ -396,16 +423,14 @@
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/luxon@1.26.0/build/global/luxon.min.js"
-            integrity="sha256-4sbTzmCCW9LGrIh5OsN8V5Pfdad1F1MwhLAOyXKnsE0="
-            crossorigin="anonymous"></script>
+            integrity="sha256-4sbTzmCCW9LGrIh5OsN8V5Pfdad1F1MwhLAOyXKnsE0=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@openactive/skos@1.4.3/dist/skos.min.js"></script>
         <script src="https://neofusion.github.io/hierarchy-select/v2/dist/hierarchy-select.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <!-- Add e.g. '@3.35.0' to the end of the leaflet URL to use a specific version number -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossorigin=""></script>
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <script src="apisearch.js"></script>
         <script src="dq.js"></script>
     </div>
