@@ -128,7 +128,8 @@ let messageIdProgress;
 let progressIndicator = "<img src='images/ajax-loader.gif' alt='In progress'>";
 $('#progress-indicator').append(progressIndicator);
 
-let rowLimit = 25000;
+let rowLimit;
+const rowLimitDefault = 25000;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -297,7 +298,7 @@ function loadingStart() {
 function loadingComplete() {
 
   // Reset rowLimit - must be set per run
-  rowLimit = 25000;
+  rowLimit = rowLimitDefault;
 
   clearTimeout(loadingTimeout);
   $('#loading-time').hide();
@@ -2010,7 +2011,7 @@ function setFeeds() {
       // console.warn(`${luxon.DateTime.now()} setFeeds: end`);
       publisherNames = [...new Set(Object.values(feeds).map(feed => feed.publisherName))];
       showAll = getUrlParameter('showall') === 'true';
-      rowLimit = getUrlParameter('rowlimit') || rowLimit;
+      rowLimit = getUrlParameter('rowlimit') || rowLimitDefault;
       urlTriggered = (getUrlParameter('endpoint') !== '') && (getUrlParameter('endpoint') in feeds);
       executeTriggered = getUrlParameter('execute') === 'true';
       setProviders();
