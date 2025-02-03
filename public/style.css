@@ -300,3 +300,8 @@ input:checked + .slider:before {
 }
 
 #map { height: 1000px; }
+
+#json {margin-top:15px;}
+#idPanel {margin-top:15px;}
+#idFilterText {display: flex; align-items: center; }
+#idInput {width:100%;}
