@@ -1617,12 +1617,12 @@ function addIdPanel() {
   panel.append(
     '<div class="row">' +
       '<div id="idFilterText" class="col-auto bottom">' +
-          '<label">Filter by ID:</label>' +
+          '<label">Filter items by ID:</label>' +
       '</div>' +
-      '<div class="col">' + // Fill remaining space in the row
+      '<div class="col">' +
           '<input type="text" id="idInput" class="form-control bottom"/>' +
       '</div>' +
-      '<div class="col-auto">' + // For the button
+      '<div class="col-auto">' +
         '<button type="button" id="idFilterSubmit" class="btn btn-execute form-control bottom">Search</button>' +
       '</div>' +
     '</div>' +

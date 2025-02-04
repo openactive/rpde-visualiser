@@ -1072,6 +1072,13 @@ function postDataQuality() {
 
   // -------------------------------------------------------------------------------------------------
 
+  if (showingSample) {
+    $("#idTab").addClass("disabled");
+  }
+
+  // -------------------------------------------------------------------------------------------------
+
+
   // Sort objects by keys in ascending alphabetical order:
   storeDataQuality.filteredItemsUniqueOrganizers = Object.fromEntries(Object.entries(storeDataQuality.filteredItemsUniqueOrganizers).sort());
   storeDataQuality.filteredItemsUniqueLocations = Object.fromEntries(Object.entries(storeDataQuality.filteredItemsUniqueLocations).sort());
