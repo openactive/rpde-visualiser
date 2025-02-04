@@ -98,6 +98,14 @@ function postResults(item) {
       }
     );
   }
+
+  //Also outputting ids to the ID filter tab to indicate format required for searching
+  if (storeDataQuality.numFilteredItems < 20) {
+  $("#idFilter").append(
+    `<div id='filterRow${storeDataQuality.numFilteredItems}' class='row rowhover'>` +
+    `    <div id='filterText${storeDataQuality.numFilteredItems}' class='col-auto'>${item.id || item.data['@id']}</div>` +
+    ` </div>`);
+  }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -757,6 +765,8 @@ function postDataQuality() {
 
   // This needs to occur before postResults() which happens in the loop:
   $("#results").empty();
+  $("#idFilter").empty();
+  addIdPanel(); // Add filter input, then append examples below
   addResultsPanel();
 
   // -------------------------------------------------------------------------------------------------
@@ -1040,6 +1050,8 @@ function postDataQuality() {
   $("#locationPanel").removeClass("active disabled");
   $("#mapTab").removeClass("active disabled");
   $("#mapPanel").removeClass("active disabled");
+  $("#idTab").removeClass("active disabled");
+  $("#idPanel").removeClass("active disabled");
 
   if (storeDataQuality.numFilteredItems === 0) {
     $("#results").append(
@@ -1055,9 +1067,17 @@ function postDataQuality() {
     $("#organizerTab").addClass("disabled");
     $("#locationTab").addClass("disabled");
     $("#mapTab").addClass("disabled");
+    $("#idTab").addClass("disabled");
   }
 
   // -------------------------------------------------------------------------------------------------
+
+  if (showingSample) {
+    $("#idTab").addClass("disabled");
+  }
+
+  // -------------------------------------------------------------------------------------------------
+
 
   // Sort objects by keys in ascending alphabetical order:
   storeDataQuality.filteredItemsUniqueOrganizers = Object.fromEntries(Object.entries(storeDataQuality.filteredItemsUniqueOrganizers).sort());

@@ -452,6 +452,7 @@ function clearTabs() {
   $("#organizer").empty();
   $("#location").empty();
   $("#map").empty();
+  $("#idFilter").empty();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1367,6 +1368,8 @@ function setJSONTab(itemId, item, switchTab) {
   if (switchTab) {
     $("#resultTab").removeClass("active");
     $("#resultPanel").removeClass("active");
+    $("#idTab").removeClass("active");
+    $("#idPanel").removeClass("active");
     $("#jsonTab").addClass("active");
     $("#jsonPanel").addClass("active");
     // updateScrollResults();
@@ -1412,6 +1415,14 @@ function setJSONTab(itemId, item, switchTab) {
     storeIngressOrder2.items.hasOwnProperty(itemId)
   ) {
     setJSONTabSubPanel(1, storeIngressOrder2.items[itemId], storeIngressOrder2?.urls?.[itemId]);
+  }
+  else {
+    let panel = $("#json");
+    panel.append(
+      '<div class="row">' +
+      '   <div class="col-auto">Sorry, unable to find that ID in the data.</div>' +
+      '</div>'
+    );
   }
 
 }
@@ -1599,6 +1610,44 @@ function addMapPanel(locations) {
   }
 
 }
+
+// -------------------------------------------------------------------------------------------------
+function addIdPanel() {
+  let panel = $("#idFilter");
+  panel.append(
+    '<div class="row">' +
+      '<div id="idFilterText" class="col-auto bottom">' +
+          '<label">Filter items by ID:</label>' +
+      '</div>' +
+      '<div class="col">' +
+          '<input type="text" id="idInput" class="form-control bottom"/>' +
+      '</div>' +
+      '<div class="col-auto">' +
+        '<button type="button" id="idFilterSubmit" class="btn btn-execute form-control bottom">Search</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="row">' +
+      '<div class="col-auto bottom">' +
+          '<label">Example IDs:</label>' +
+      '</div>' +
+    '</div>'
+  )
+
+  $('#idFilterSubmit').click(function() {
+    if (activeJSONButton) {
+      activeJSONButton.style.backgroundColor = inactiveJSONButtonColor;
+    }
+    const idValue = $('#idInput').val();
+    if (!idValue) {  // Check if idValue is empty or contains only whitespace
+      alert("Please enter an ID.");
+      return; // Stop further execution
+  }
+    setJSONTab(idValue, showingSample ? item : null, true);
+});
+
+}
+
+
 
 // -------------------------------------------------------------------------------------------------
 
