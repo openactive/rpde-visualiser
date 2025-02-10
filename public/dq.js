@@ -661,7 +661,7 @@ function setStoreDataQualityItemFlags() {
     // https://accessibility-support.openactive.io/en.html
     // Code below for checking against a vocabulary (copied from activity list) but for now just counting presence / absence
 
-    const accessibilitySupport = resolveProperty(item, 'accessibilitySupport');
+    const accessibilitySupport = getProperty(item, 'accessibilitySupport');
     const isEmptyAccessibilitySupport = !accessibilitySupport ||
       (typeof accessibilitySupport === 'string' && accessibilitySupport.trim() === '') ||
       (typeof accessibilitySupport === 'object' && Object.keys(accessibilitySupport).length === 0);
@@ -670,7 +670,7 @@ function setStoreDataQualityItemFlags() {
         storeDataQuality.dqSummary.DQ_validAccessibilitySupport++;
     }
 
-    const genderRestriction = resolveProperty(item, 'genderRestriction');
+    const genderRestriction = getProperty(item, 'genderRestriction');
     const isEmptyGenderRestriction  = !genderRestriction ||
       (typeof genderRestriction === 'string' && genderRestriction.trim() === '') ||
       (typeof genderRestriction === 'object' && Object.keys(genderRestriction).length === 0);
@@ -679,7 +679,7 @@ function setStoreDataQualityItemFlags() {
         storeDataQuality.dqSummary.DQ_validGenderRestriction++;
     }
 
-    const ageRange = resolveProperty(item, 'ageRange');
+    const ageRange = getProperty(item, 'ageRange');
     const isEmptyAgeRange = !ageRange ||
                           (typeof ageRange === 'string' && ageRange.trim() === '') ||
                           (typeof ageRange === 'object' && Object.keys(ageRange).length === 0);
