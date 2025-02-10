@@ -305,3 +305,10 @@ input:checked + .slider:before {
 #idPanel {margin-top:15px;}
 #idFilterText {display: flex; align-items: center; }
 #idInput {width:100%;}
+
+
+#apexchart_a_bar1 .row {
+  margin-top: 10px;
+  margin-right: 15px;
+  margin-left: 15px;
+}

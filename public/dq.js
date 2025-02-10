@@ -466,6 +466,9 @@ function setStoreDataQualityItemFlags() {
     DQ_validDate: 0,
     DQ_validParentUrl: 0,
     DQ_validChildUrl: 0,
+    DQ_validAccessibilitySupport: 0,
+    DQ_validGenderRestriction: 0,
+    DQ_validAgeRange: 0,
     dateUpdated: 0,
   }; // The order of keys here may be important for the PostgreSQL database, see '/api/insert' in app.js
 
@@ -494,6 +497,9 @@ function setStoreDataQualityItemFlags() {
       DQ_validParent: false,
       DQ_validChildUrl: false,
       DQ_validParentUrl: false,
+      DQ_validAccessibilitySupport: false,
+      DQ_validGenderRestriction: false,
+      DQ_validAgeRange: false,
     };
 
     // -------------------------------------------------------------------------------------------------
@@ -651,6 +657,68 @@ function setStoreDataQualityItemFlags() {
 
     // -------------------------------------------------------------------------------------------------
 
+    // In depth listings and accessiblity Measures
+    // https://accessibility-support.openactive.io/en.html
+    // Code below for checking against a vocabulary (copied from activity list) but for now just counting presence / absence
+
+    const accessibilitySupport = getProperty(item, 'accessibilitySupport');
+    const isEmptyAccessibilitySupport = !accessibilitySupport ||
+      (typeof accessibilitySupport === 'string' && accessibilitySupport.trim() === '') ||
+      (typeof accessibilitySupport === 'object' && Object.keys(accessibilitySupport).length === 0);
+    storeDataQuality.dqFlags[item.id].DQ_validAccessibilitySupport = !isEmptyAccessibilitySupport;
+    if (storeDataQuality.dqFlags[item.id].DQ_validAccessibilitySupport) {
+        storeDataQuality.dqSummary.DQ_validAccessibilitySupport++;
+    }
+
+    const genderRestriction = getProperty(item, 'genderRestriction');
+    const isEmptyGenderRestriction  = !genderRestriction ||
+      (typeof genderRestriction === 'string' && genderRestriction.trim() === '') ||
+      (typeof genderRestriction === 'object' && Object.keys(genderRestriction).length === 0);
+    storeDataQuality.dqFlags[item.id].DQ_validGenderRestriction = !isEmptyGenderRestriction;
+    if (storeDataQuality.dqFlags[item.id].DQ_validGenderRestriction) {
+        storeDataQuality.dqSummary.DQ_validGenderRestriction++;
+    }
+
+    const ageRange = getProperty(item, 'ageRange');
+    const isEmptyAgeRange = !ageRange ||
+                          (typeof ageRange === 'string' && ageRange.trim() === '') ||
+                          (typeof ageRange === 'object' && Object.keys(ageRange).length === 0);
+    console.log(ageRange)
+    storeDataQuality.dqFlags[item.id].DQ_validAgeRange = !isEmptyAgeRange;
+    console.log(storeDataQuality.dqFlags[item.id].DQ_validAgeRange)
+    if (storeDataQuality.dqFlags[item.id].DQ_validAgeRange) {
+      storeDataQuality.dqSummary.DQ_validAgeRange++;
+    }
+
+
+
+    //validActivity =
+     // Array.isArray(activities) &&
+     // activities
+      //  .map(activity => activity['id'] || activity['@id'])
+      //  .filter(activityId => activityId)
+      //  .map(activityId => matchToActivityList(activityId))
+      //  .filter(prefLabel => prefLabel)
+      //  .length > 0;
+
+    //const facilities = resolveProperty(item, 'facilityType');
+    //validFacility = Array.isArray(facilities) &&
+    //  facilities
+    //    .map(activity => activity['id'] || activity['@id'])
+    //    .filter(activityId => activityId)
+    //    .map(activityId => matchToFacilityList(activityId))
+    //    .filter(prefLabel => prefLabel)
+    //    .length > 0;
+
+    // storeDataQuality.dqFlags[item.id].DQ_validActivity = validActivity || validFacility;
+
+    //if (storeDataQuality.dqFlags[item.id].DQ_validActivity) {
+    //  storeDataQuality.dqSummary.DQ_validActivity++;
+    //}
+
+    // -------------------------------------------------------------------------------------------------
+
+
     $('#storeDataQualityItemCount').text(itemIdx + 1);
   }
 
@@ -784,6 +852,9 @@ function postDataQuality() {
   storeDataQuality.numFilteredItemsWithValidDate = 0;
   storeDataQuality.numFilteredItemsWithValidChildUrl = 0;
   storeDataQuality.numFilteredItemsWithValidParentUrl = 0;
+  storeDataQuality.numFilteredItemsWithValidAccessibilitySupport = 0;
+  storeDataQuality.numFilteredItemsWithValidGenderRestriction = 0;
+  storeDataQuality.numFilteredItemsWithValidAgeRange = 0;
   storeDataQuality.showMap = false;
 
   // ----FOR-LOOP-PROCESSING--------------------------------------------------------------------------
@@ -1016,6 +1087,20 @@ function postDataQuality() {
 
       // -------------------------------------------------------------------------------------------------
 
+      if (storeDataQuality.dqFlags[item.id].DQ_validAccessibilitySupport) {
+        storeDataQuality.numFilteredItemsWithValidAccessibilitySupport++;
+      }
+
+      if (storeDataQuality.dqFlags[item.id].DQ_validGenderRestriction) {
+        storeDataQuality.numFilteredItemsWithValidGenderRestriction++;
+      }
+
+      if (storeDataQuality.dqFlags[item.id].DQ_validAgeRange) {
+        storeDataQuality.numFilteredItemsWithValidAgeRange++;
+      }
+
+      // -------------------------------------------------------------------------------------------------
+
       if (storeDataQuality.numFilteredItems < 100) {
         postResults(item);
       }
@@ -1194,6 +1279,23 @@ function postDataQuality() {
 
   var percent4_b = (storeDataQuality.numFilteredItemsWithValidParentUrl / storeDataQuality.numFilteredItems) * 100 || 0;
   var rounded4_b = percent4_b.toFixed(1);
+
+  // -------------------------------------------------------------------------------------------------
+
+  console.log(`Number of items with valid Accessibility Support: ${storeDataQuality.numFilteredItemsWithValidAccessibilitySupport}`);
+
+  var percent_a1 = (storeDataQuality.numFilteredItemsWithValidAccessibilitySupport / storeDataQuality.numFilteredItems) * 100 || 0;
+  var rounded_a1 = percent_a1.toFixed(1);
+
+  console.log(`Number of items with valid Gender Restriction: ${storeDataQuality.numFilteredItemsWithValidGenderRestriction}`);
+
+  var percent_a2 = (storeDataQuality.numFilteredItemsWithValidGenderRestriction / storeDataQuality.numFilteredItems) * 100 || 0;
+  var rounded_a2 = percent_a2.toFixed(1);
+
+  console.log(`Number of items with valid Age Range: ${storeDataQuality.numFilteredItemsWithValidAgeRange}`);
+
+  var percent_a3 = (storeDataQuality.numFilteredItemsWithValidAgeRange / storeDataQuality.numFilteredItems) * 100 || 0;
+  var rounded_a3 = percent_a3.toFixed(1);
 
   // -------------------------------------------------------------------------------------------------
 
@@ -2067,5 +2169,20 @@ function postDataQuality() {
     // Reset showAll - only show on initial load, not after filter changes
     showAll = false;
   });
+
+  // Populating info on 2nd Use Case tab
+  $("#apexchart_a_bar1").empty();
+  $("#apexchart_a_bar1").append(
+    `<div class='row rowhover'>` +
+    `    <div>${rounded_a1}% of items include Accessibility Support info</div>` +
+    `</div>` +
+    `<div class='row rowhover'>` +
+    `    <div>${rounded_a2}% have Gender Restriction info</div>` +
+    `</div>` +
+    `<div class='row rowhover'>` +
+    `    <div>${rounded_a3}% have Age Range info</div>` +
+    `</div>`
+  );
+
 
 }
