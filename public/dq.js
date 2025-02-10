@@ -469,6 +469,7 @@ function setStoreDataQualityItemFlags() {
     DQ_validAccessibilitySupport: 0,
     DQ_validGenderRestriction: 0,
     DQ_validAgeRange: 0,
+    DQ_validAmenityFeature: 0,
     dateUpdated: 0,
   }; // The order of keys here may be important for the PostgreSQL database, see '/api/insert' in app.js
 
@@ -500,6 +501,7 @@ function setStoreDataQualityItemFlags() {
       DQ_validAccessibilitySupport: false,
       DQ_validGenderRestriction: false,
       DQ_validAgeRange: false,
+      DQ_validAmenityFeature: false,
     };
 
     // -------------------------------------------------------------------------------------------------
@@ -683,13 +685,19 @@ function setStoreDataQualityItemFlags() {
     const isEmptyAgeRange = !ageRange ||
                           (typeof ageRange === 'string' && ageRange.trim() === '') ||
                           (typeof ageRange === 'object' && Object.keys(ageRange).length === 0);
-    console.log(ageRange)
     storeDataQuality.dqFlags[item.id].DQ_validAgeRange = !isEmptyAgeRange;
-    console.log(storeDataQuality.dqFlags[item.id].DQ_validAgeRange)
     if (storeDataQuality.dqFlags[item.id].DQ_validAgeRange) {
       storeDataQuality.dqSummary.DQ_validAgeRange++;
     }
 
+    const amenityFeature = getProperty(item, 'amenityFeature');
+    const isEmptyAmenityFeature = !amenityFeature ||
+      (typeof amenityFeature === 'string' && amenityFeature.trim() === '') ||
+      (typeof amenityFeature === 'object' && Object.keys(amenityFeature).length === 0);
+    storeDataQuality.dqFlags[item.id].DQ_validAmenityFeature = !isEmptyAmenityFeature;
+    if (storeDataQuality.dqFlags[item.id].DQ_validAmenityFeature) {
+      storeDataQuality.dqSummary.DQ_validAmenityFeature++;
+    }
 
 
     //validActivity =
@@ -855,6 +863,7 @@ function postDataQuality() {
   storeDataQuality.numFilteredItemsWithValidAccessibilitySupport = 0;
   storeDataQuality.numFilteredItemsWithValidGenderRestriction = 0;
   storeDataQuality.numFilteredItemsWithValidAgeRange = 0;
+  storeDataQuality.numFilteredItemsWithValidAmenityFeature = 0;
   storeDataQuality.showMap = false;
 
   // ----FOR-LOOP-PROCESSING--------------------------------------------------------------------------
@@ -1099,6 +1108,10 @@ function postDataQuality() {
         storeDataQuality.numFilteredItemsWithValidAgeRange++;
       }
 
+      if (storeDataQuality.dqFlags[item.id].DQ_validAmenityFeature) {
+        storeDataQuality.numFilteredItemsWithValidAmenityFeature++;
+      }
+
       // -------------------------------------------------------------------------------------------------
 
       if (storeDataQuality.numFilteredItems < 100) {
@@ -1159,8 +1172,12 @@ function postDataQuality() {
 
   if (showingSample) {
     $("#idTab").addClass("disabled");
+    $("#UC2tab").addClass("disabled");
   }
 
+  if (!showingSample) {
+    $("#UC2tab").removeClass("disabled");
+  }
   // -------------------------------------------------------------------------------------------------
 
 
@@ -1297,6 +1314,10 @@ function postDataQuality() {
   var percent_a3 = (storeDataQuality.numFilteredItemsWithValidAgeRange / storeDataQuality.numFilteredItems) * 100 || 0;
   var rounded_a3 = percent_a3.toFixed(1);
 
+  console.log(`Number of items with valid amenityFeature: ${storeDataQuality.numFilteredItemsWithValidAmenityFeature}`);
+
+  var percent_a4 = (storeDataQuality.numFilteredItemsWithValidAmenityFeature / storeDataQuality.numFilteredItems) * 100 || 0;
+  var rounded_a4 = percent_a4.toFixed(1);
   // -------------------------------------------------------------------------------------------------
 
   // OUTPUT THE METRICS TO THE HTML...
@@ -2172,15 +2193,17 @@ function postDataQuality() {
 
   // Populating info on 2nd Use Case tab
   $("#apexchart_a_bar1").empty();
-  $("#apexchart_a_bar1").append(
-    `<div class='row rowhover'>` +
-    `    <div>${rounded_a1}% of items include Accessibility Support info</div>` +
-    `</div>` +
-    `<div class='row rowhover'>` +
-    `    <div>${rounded_a2}% have Gender Restriction info</div>` +
+  $("#apexchart_a_bar1").append(`<div class='row rowhover'>` +
+    `    <div>${rounded_a2}% of items have Gender Restriction info</div>` +
     `</div>` +
     `<div class='row rowhover'>` +
     `    <div>${rounded_a3}% have Age Range info</div>` +
+    `</div>` +
+    `<div class='row rowhover'>` +
+    `    <div>${rounded_a1}% have Accessibility Support info</div>` +
+    `</div>` +
+    `<div class='row rowhover'>` +
+    `    <div>${rounded_a4}% have Amenity Feature info</div>` +
     `</div>`
   );
 
