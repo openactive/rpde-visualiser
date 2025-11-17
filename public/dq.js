@@ -1758,14 +1758,17 @@ function postDataQuality() {
       activityLabel = 'Have facility IDs';
     }
 
+    // Ensure values are valid numbers, default to 0 if not
+    const val_a = isNaN(parseFloat(rounded3_a)) ? 0 : parseFloat(rounded3_a);
+    const val_b = isNaN(parseFloat(rounded3_b)) ? 0 : parseFloat(rounded3_b);
+    const val_c = isNaN(parseFloat(rounded3_c)) ? 0 : parseFloat(rounded3_c);
+
     options_percentItemsWithActivity = {
       chart: {
         height: 300,
         type: 'radialBar',
         events: {
           click: function (event, chartContext, config) {
-            //if ([...event.target.classList].includes('#apexcharts-radialbarTrack-0')) {
-            //alert('Chart clicked');
             console.log(event);
             console.log(chartContext);
             console.log(config);
@@ -1773,20 +1776,9 @@ function postDataQuality() {
         }
       },
       fill: {
-        colors: ['#A7ABDA'],
+        colors: ['#A7ABDA', '#B196CB', '#BD82BB'],
       },
-      //fill: {
-      //  colors: [function({ value, seriesIndex, w }) {
-      //    if(value < 55) {
-      //        return '#7E36AF'
-      //    } else if (value >= 55 && value < 80) {
-      //        return '#164666'
-      //    } else {
-      //        return '#D9534F'
-      //    }
-      //  }]
-      //},
-      series: [rounded3_a, rounded3_b, rounded3_c],
+      series: [val_a, val_b, val_c],
       labels: [activityLabel, 'Have names', 'Have descriptions'],
       plotOptions: {
         radialBar: {
@@ -1814,8 +1806,9 @@ function postDataQuality() {
               color: "#888",
               fontSize: "18px",
               formatter: function (w) {
-                // By default this function returns the average of all series. The below is just an example to show the use of custom formatter function
-                return Math.max(rounded3_a).toFixed(1) + "%";
+                // By default this function returns the average of all series.
+                // We want to show just one
+                return Math.max(val_a).toFixed(1) + "%";
               }
             },
           }
@@ -1847,8 +1840,8 @@ function postDataQuality() {
       fill: {
         colors: ['#B196CB'],
       },
-      series: [rounded2],
-      labels: [['Have postcode', 'or coordinates']],
+      series: [parseFloat(rounded2)],
+      labels: [['Have postcode','or coordinates']],
       plotOptions: {
         radialBar: {
           hollow: {
@@ -1896,8 +1889,8 @@ function postDataQuality() {
       fill: {
         colors: ['#BD82BB'],
       },
-      series: [rounded1],
-      labels: [['Have future', 'start dates']],
+      series: [parseFloat(rounded1)],
+      labels: [['Have future','start dates']],
       plotOptions: {
         radialBar: {
           hollow: {
@@ -1951,7 +1944,7 @@ function postDataQuality() {
     fill: {
       colors: ['#C76DAC'],
     },
-    series: [rounded4_a],
+    series: [parseFloat(rounded4_a)],
     labels: ['Have URLs'],
     plotOptions: {
       radialBar: {
@@ -1996,7 +1989,7 @@ function postDataQuality() {
       fill: {
         colors: ['#C76DAC'],
       },
-      series: [rounded4_b],
+      series: [parseFloat(rounded4_b)],
       labels: ['Have parent URLs'],
       plotOptions: {
         radialBar: {
