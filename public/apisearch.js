@@ -184,6 +184,11 @@ axios.defaults.headers = {
 };
 axios.defaults.timeout = 40000; // In ms. Default 0. Increase to wait for longer to receive response. Should be greater than the timeout in app.js which calls out to the actual feed.
 
+// Timeout in ms for the speculative HEAD-like probes used to discover a paired Feed-2 URL. These
+// URLs are guesses, so most of them are expected to fail. Keep this well below axios.defaults.timeout
+// so that a slow or unresponsive host doesn't make feed discovery look like a hang.
+const probeTimeout = 10000;
+
 // Use this to test access to another client-side localhost instance. It will only work if a permissive
 // CORS policy has been set in the other instance, or with the original Axios headers set herein:
 // axios.get('http://localhost:5050/some-page').then(response => console.log(response.data));
@@ -251,19 +256,31 @@ async function execute() {
     $('#progress-indicator').show();
 
     setLogMessage('Preparing', 'heading', true);
-    await setStoreIngressOrder1FirstPage();
-    await setStoreFeedType(storeIngressOrder1);
-    await setStoreIngressOrder2FirstPage();
-    await setStoreFeedType(storeIngressOrder2);
+
+    // The preparation steps below make network calls to discover and characterise the feeds. Any
+    // rejection that escapes here abandons the run silently: the progress indicator keeps spinning,
+    // inProgress stays true and both buttons stay disabled, so the user can only recover by reloading
+    // the page. Always fail visibly instead:
+    try {
+      await setStoreIngressOrder1FirstPage();
+      await setStoreFeedType(storeIngressOrder1);
+      await setStoreIngressOrder2FirstPage();
+      await setStoreFeedType(storeIngressOrder2);
+    }
+    catch (error) {
+      setLogMessage(`Error preparing feeds: ${error.message}`, 'error', true);
+      stop();
+      return;
+    }
 
     if (storeIngressOrder1.firstPage) {
       loadingStart();
     }
     else {
       setLogMessage('Feed-1 has no valid first page, can\'t begin', 'error', true);
-      $('#execute').prop('disabled', false);
-      $('#progress-indicator').hide();
-      inProgress = false;
+      // Use stop() so that both buttons are re-enabled, otherwise Clear stays disabled and the user is
+      // left with no way to reset the form:
+      stop();
     }
   }
 }
@@ -1001,34 +1018,78 @@ async function setStoreIngressOrder2FirstPage() {
 
 async function setStoreIngressOrder2FirstPageHelper(feedType1UrlParts, feedType2UrlParts) {
   // console.warn(`${luxon.DateTime.now()} setStoreIngressOrder2FirstPageHelper`);
-  for (const feedType1UrlPart of feedType1UrlParts) {
-    if (storeIngressOrder1.firstPage.includes(feedType1UrlPart)) {
-      for (const feedType2UrlPart of feedType2UrlParts) {
-        // If the sets of URL parts have been properly defined, then we should never have a match here. If
-        // we did, then without this check we would get the same URL for storeIngressOrder1 and storeIngressOrder2,
-        // which would be problematic:
-        if (feedType1UrlPart !== feedType2UrlPart) {
-          let storeIngressOrder2FirstPage = storeIngressOrder1.firstPage.replace(feedType1UrlPart, feedType2UrlPart);
-          if (storeIngressOrder1FirstPageFromUser) {
-            // We expect that a number of URL combinations may be made before a success is had, so we don't
-            // worry about catching errors here:
-            await axios.get(`/fetch?url=${encodeURIComponent(storeIngressOrder2FirstPage)}`)
-              .then(response => {
-                storeIngressOrder2.firstPage = (response.status === 200) ? storeIngressOrder2FirstPage : null;
-              });
-            if (storeIngressOrder2.firstPage) {
-              return;
-            }
-          }
-          else {
-            if (storeIngressOrder2FirstPage in feeds) {
-              storeIngressOrder2.firstPage = storeIngressOrder2FirstPage;
-              return;
-            }
-          }
-        }
-      }
+
+  // Match on the longest URL part first, and use only that one. The URL part lists are not ordered
+  // longest-first, and the shorter entries are often substrings of the longer ones (e.g.
+  // 'scheduled-session' inside 'scheduled-sessions'), so matching on a short one produces malformed
+  // candidates such as '.../session-seriess':
+  const feedType1UrlPartMatched = [...feedType1UrlParts]
+    .sort((a, b) => b.length - a.length)
+    .find(feedType1UrlPart => storeIngressOrder1.firstPage.includes(feedType1UrlPart));
+
+  if (!feedType1UrlPartMatched) {
+    return;
+  }
+
+  // Candidate Feed-2 URLs, in order of preference. Note that if the sets of URL parts have been properly
+  // defined then the first filter should never exclude anything. If it did, then without it we would get
+  // the same URL for storeIngressOrder1 and storeIngressOrder2, which would be problematic. The second
+  // filter is belt and braces against the same outcome:
+  const candidates = feedType2UrlParts
+    .filter(feedType2UrlPart => feedType2UrlPart !== feedType1UrlPartMatched)
+    .map(feedType2UrlPart => storeIngressOrder1.firstPage.replace(feedType1UrlPartMatched, feedType2UrlPart))
+    .filter(candidate => candidate !== storeIngressOrder1.firstPage);
+
+  if (!storeIngressOrder1FirstPageFromUser) {
+    // Menu-URL case: the paired feed is either already in the known feed list or it doesn't exist, so
+    // there is nothing to probe:
+    storeIngressOrder2.firstPage = candidates.find(candidate => candidate in feeds) || null;
+    return;
+  }
+
+  // User-URL case: the paired feed won't be in the known feed list, so each candidate has to be probed.
+  // Probe them concurrently rather than one at a time. A publisher with no paired feed would otherwise
+  // wait for every candidate to fail in turn, which against a slow or unresponsive host is a long stall
+  // with nothing on screen but a spinner. probeCandidateUrl() never rejects, so Promise.all is safe here:
+  const probeResults = await Promise.all(candidates.map(candidate => probeCandidateUrl(candidate)));
+  const candidateIdx = probeResults.indexOf(true);
+
+  storeIngressOrder2.firstPage = (candidateIdx === -1) ? null : candidates[candidateIdx];
+
+  // Finding no paired feed is a perfectly normal situation - plenty of publishers publish only one of a
+  // super-event / sub-event pair - so report what was tried rather than treating it as an error:
+  if (candidateIdx === -1 && candidates.length > 0) {
+    message = `No paired Feed-2 found for Feed-1. Probed:${candidates.map(candidate => `<br>&emsp;&emsp;${candidate}`).join('')}`;
+    setLogMessage([message, `No paired Feed-2 found for Feed-1. Probed:\n\t${candidates.join('\n\t')}`], 'warn', true);
+  }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+// Probe a speculative Feed-2 URL. Returns true only if the URL responds 200 with something that looks
+// like an RPDE page, and false for everything else.
+//
+// Note that axios rejects on any non-2xx response, and our /fetch endpoint passes the upstream status
+// straight through. A publisher who has no paired feed therefore returns 404 here, which used to reject
+// with nothing to catch it: the rejection propagated out of setStoreIngressOrder2FirstPageHelper(), out
+// of setStoreIngressOrder2FirstPage() and out of execute(), leaving the 'Feed-2 URL' spinner turning
+// forever and the run permanently wedged. A failed probe just means 'not this URL', so swallow it:
+async function probeCandidateUrl(url) {
+  try {
+    const response = await axios.get(`/fetch?url=${encodeURIComponent(url)}`, { timeout: probeTimeout });
+    if (response.status !== 200) {
+      return false;
     }
+    // Guard against hosts that answer unknown paths with 200 and an HTML or JSON error body, which would
+    // otherwise be accepted as a feed and then harvested as garbage. RPDE pages always carry an 'items'
+    // array; the string test covers publishers who serve JSON under a non-JSON content type:
+    return Array.isArray(response?.data?.items) ||
+      (typeof response.data === 'string' && response.data.includes('"items"'));
+  }
+  catch (error) {
+    // Expected for most candidates: 404, 5xx, timeout, DNS failure etc.
+    console.log(`Feed-2 candidate rejected: ${url}: ${error.message}`);
+    return false;
   }
 }
 

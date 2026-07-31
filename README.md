@@ -24,6 +24,10 @@ To explore data quality issues:
 
 THIS TOOLS IS IN BETA - PLEASE RAISE ANY ISSUES HERE OR WITH THE OPENACTIVE TEAM
 
+# Tests
+
+Run `npm test`. The tests load `public/apisearch.js` into a Node sandbox and call its functions directly, so no browser and no database are needed. Add new tests under `test/`.
+
 # Background
 
 The original Visualiser made it easy to explore OpenActive SessionSeries data directly from RPDE feeds, leveraging the CDN to ensure fast query response times.
